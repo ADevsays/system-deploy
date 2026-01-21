@@ -1,0 +1,16 @@
+CLAUDE.md
+.claude
+temp/
+results/
+.env
+credentials.json
+token.json
+__pycache__/
+*.pyc
+*.pyo
+*.mp3
+*.wav
+*.mp4
+*.avi
+.DS_Store
+.env.example
