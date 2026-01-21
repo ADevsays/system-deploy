@@ -1,21 +1,26 @@
-"""
-Script de testing local
-Prueba la funcionalidad básica antes del deployment
-"""
-
 import sys
 import os
 import requests
 import time
 from pathlib import Path
+import urllib3
+
+# Añadir la raíz del proyecto al path para poder importar app
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 BASE_URL = os.getenv("API_URL", "http://localhost:8000")
+SSL_VERIFY = os.getenv("SSL_VERIFY", "true").lower() == "true"
+
+# Deshabilitar warnings de SSL si SSL_VERIFY es False
+if not SSL_VERIFY:
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def test_health_check():
     """Test 1: API está corriendo"""
     print("\n🔍 Test 1: Health Check")
     try:
-        response = requests.get(f"{BASE_URL}/")
+        response = requests.get(f"{BASE_URL}/", verify=SSL_VERIFY)
         assert response.status_code == 200
         assert response.json()["message"] == "API is running"
         print("✅ API está corriendo correctamente")
@@ -28,7 +33,7 @@ def test_task_creation():
     """Test 2: Crear tarea"""
     print("\n🔍 Test 2: Crear Tarea")
     try:
-        response = requests.get(f"{BASE_URL}/tasks/init")
+        response = requests.get(f"{BASE_URL}/tasks/init", verify=SSL_VERIFY)
         assert response.status_code == 200
         task_id = response.json()["task_id"]
         print(f"✅ Tarea creada: {task_id}")
@@ -41,7 +46,7 @@ def test_task_status(task_id):
     """Test 3: Verificar estado de tarea"""
     print(f"\n🔍 Test 3: Verificar Estado de Tarea")
     try:
-        response = requests.get(f"{BASE_URL}/status/{task_id}")
+        response = requests.get(f"{BASE_URL}/status/{task_id}", verify=SSL_VERIFY)
         assert response.status_code == 200
         status = response.json()
         print(f"✅ Estado de tarea obtenido: {status['status']}")
@@ -81,7 +86,7 @@ def test_audio_processing(task_id):
     """Test 5: Procesar audio (opcional, requiere archivo de prueba)"""
     print("\n🔍 Test 5: Procesamiento de Audio")
     
-    test_audio_path = "test_audio.mp3"
+    test_audio_path = "audio.mp3"
     
     if not os.path.exists(test_audio_path):
         print(f"⚠️  Archivo de prueba no encontrado: {test_audio_path}")
@@ -98,7 +103,8 @@ def test_audio_processing(task_id):
                 f"{BASE_URL}/audio/cut",
                 files=files,
                 data=data,
-                timeout=120
+                timeout=120,
+                verify=SSL_VERIFY
             )
             
             if response.status_code == 200:
@@ -120,6 +126,7 @@ def main():
     print("Testing Local - Content Processing API")
     print("=" * 60)
     print(f"\nBase URL: {BASE_URL}")
+    print(f"SSL Verify: {SSL_VERIFY}")
     print("\nAsegúrate de que la API esté corriendo:")
     print("  uvicorn app.main:app --reload")
     print("  o")
