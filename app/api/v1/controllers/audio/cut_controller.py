@@ -67,7 +67,7 @@ def cut_audio_handler(file: UploadFile = File(...)):
         output_filename = f"edit_{file.filename}"
         
         try:
-            drive_link = drive_service.upload_file(
+            drive_data = drive_service.upload_file(
                 file_path=temp_output,
                 filename=output_filename,
                 mime_type='audio/mpeg'
@@ -75,12 +75,14 @@ def cut_audio_handler(file: UploadFile = File(...)):
             
             os.remove(temp_output)
             
-            logger.info(f"Archivo subido a Google Drive: {drive_link}")
+            logger.info(f"Archivo subido a Google Drive: {drive_data['drive_url']}")
+            logger.info(f"ID del archivo: {drive_data['file_id']}")
             
             return JSONResponse({
                 "success": True,
                 "task_id": task_id,
-                "drive_link": drive_link,
+                "drive_link": drive_data["drive_url"],
+                "file_id": drive_data["file_id"],
                 "filename": output_filename,
                 "message": "Archivo procesado y subido a Google Drive correctamente"
             })

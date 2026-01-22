@@ -110,7 +110,10 @@ class GoogleDriveService:
             ).execute()
             
             # Retornar enlace público
-            return f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
+            return {
+                "drive_url":f"https://drive.google.com/file/d/{file_id}/view?usp=sharing",
+                "file_id": file_id
+            }
             
         except Exception as e:
             logger.error(f"Error uploading file to Google Drive: {str(e)}")
