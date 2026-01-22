@@ -19,12 +19,11 @@ logger = logging.getLogger(__name__)
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
 
 def generate_task_id():
-    task_id = str(uuid4())
-    logger.info(f"Archivo recibido - Task ID generado: {task_id}")
-    
-    task = Task(task_id=task_id)
-    task_manager.add_task(task)
-    return task_id
+    logger.info("Creating new task")
+    new_task = Task(id=str(uuid4()), porcentage=0, status="pending")
+    task_manager.add_task(new_task)
+    logger.info(f"Created new task: {new_task.id}")
+    return new_task.id
 
 def cut_audio_handler(file: UploadFile = File(...)):
     temp_file = None
