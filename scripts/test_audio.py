@@ -52,7 +52,6 @@ def test_audio_upload(audio_file: str):
             files = {'file': (os.path.basename(audio_file), f, 'audio/mpeg')}
             response = requests.post(
                 f"{BASE_URL}/audio/cut",
-                params={'task_id': task_id},
                 files=files,
                 timeout=120,
                 verify=SSL_VERIFY

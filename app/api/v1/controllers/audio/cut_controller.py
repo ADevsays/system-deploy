@@ -20,7 +20,7 @@ ALLOWED_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
 
 def generate_task_id():
     task_id = str(uuid4())
-    logger.info(f"Archivo recibido: {file.filename} - Task ID generado: {task_id}")
+    logger.info(f"Archivo recibido - Task ID generado: {task_id}")
     
     task = Task(task_id=task_id)
     task_manager.add_task(task)
