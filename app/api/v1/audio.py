@@ -16,5 +16,5 @@ ALLOWED_EXTENSIONS = {".mp3", ".wav", ".ogg", ".aac", ".flac", ".m4a"}
 router = APIRouter()
 
 @router.post("/cut")
-def cut_audio_route(file: UploadFile = File(...), task_id: str = None):
-    return cut_audio_handler(file, task_id)
+def cut_audio_route(file: UploadFile = File(...)):
+    return cut_audio_handler(file)

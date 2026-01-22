@@ -1,16 +1,17 @@
-"""
-Script para automatizar el test del endpoint de audio
-Uso: python scripts/test_audio_upload.py [ruta_archivo.mp3]
-"""
-
 import sys
 import os
 import requests
 from pathlib import Path
+import urllib3
 
 # Configuración
 BASE_URL = os.getenv("API_URL", "http://localhost:8000")
 DEFAULT_AUDIO = "audio.mp3"
+SSL_VERIFY = os.getenv("SSL_VERIFY", "true").lower() == "true"
+
+# Deshabilitar warnings de SSL si SSL_VERIFY es False
+if not SSL_VERIFY:
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def test_audio_upload(audio_file: str):
     """
@@ -34,7 +35,7 @@ def test_audio_upload(audio_file: str):
     # Paso 1: Inicializar tarea
     print("\n1️⃣ Inicializando tarea...")
     try:
-        response = requests.get(f"{BASE_URL}/tasks/init")
+        response = requests.get(f"{BASE_URL}/tasks/init", verify=SSL_VERIFY)
         response.raise_for_status()
         task_id = response.json()["task_id"]
         print(f"   ✅ Task ID: {task_id}")
@@ -53,7 +54,8 @@ def test_audio_upload(audio_file: str):
                 f"{BASE_URL}/audio/cut",
                 params={'task_id': task_id},
                 files=files,
-                timeout=120
+                timeout=120,
+                verify=SSL_VERIFY
             )
             response.raise_for_status()
             result = response.json()

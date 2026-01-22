@@ -18,25 +18,19 @@ logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
 
-def cut_audio_handler(file: UploadFile = File(...), task_id: str = None):
+def generate_task_id():
+    task_id = str(uuid4())
+    logger.info(f"Archivo recibido: {file.filename} - Task ID generado: {task_id}")
+    
+    task = Task(task_id=task_id)
+    task_manager.add_task(task)
+    return task_id
+
+def cut_audio_handler(file: UploadFile = File(...)):
     temp_file = None
     temp_output = None
     
-    logger.info(f"Archivo recibido: {file.filename}")
-    
-    if not task_id:
-        raise HTTPException(
-            status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail="task_id es requerido"
-        )
-    
-    task = task_manager.get_task(task_id)
-    if not task:
-        raise HTTPException(
-            status_code=http_status.HTTP_404_NOT_FOUND,
-            detail=f"Task {task_id} no encontrada"
-        )
-
+    task_id = generate_task_id()
     try:
         # Definimos la lógica completa que queremos ejecutar bajo monitoreo de progreso
         def execute_process():
@@ -86,6 +80,7 @@ def cut_audio_handler(file: UploadFile = File(...), task_id: str = None):
             
             return JSONResponse({
                 "success": True,
+                "task_id": task_id,
                 "drive_link": drive_link,
                 "filename": output_filename,
                 "message": "Archivo procesado y subido a Google Drive correctamente"
