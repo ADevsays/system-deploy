@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
+ALLOWED_EXTENSIONS = {".mpga", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".mp3"}
 
 def generate_task_id():
     logger.info("Creating new task")
