@@ -63,7 +63,7 @@ def cut_audio_handler(file: UploadFile = File(...)):
         logger.info(f"Audio procesado exitosamente: {temp_output}")
 
         from app.services.google_drive import drive_service
-                
+
         try:
             drive_data = drive_service.upload_file(
                 file_path=temp_output,
@@ -81,7 +81,7 @@ def cut_audio_handler(file: UploadFile = File(...)):
                 "task_id": task_id,
                 "drive_link": drive_data["drive_url"],
                 "file_id": drive_data["file_id"],
-                "filename": output_filename,
+                "filename": file.filename,
                 "message": "Archivo procesado y subido a Google Drive correctamente"
             })
         
