@@ -63,13 +63,11 @@ def cut_audio_handler(file: UploadFile = File(...)):
         logger.info(f"Audio procesado exitosamente: {temp_output}")
 
         from app.services.google_drive import drive_service
-        
-        output_filename = f"edit_{file.filename}"
-        
+                
         try:
             drive_data = drive_service.upload_file(
                 file_path=temp_output,
-                filename=output_filename,
+                filename=file.filename,
                 mime_type='audio/mpeg'
             )
             
