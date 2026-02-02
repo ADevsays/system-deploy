@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, Query
+from fastapi import APIRouter, UploadFile, File, Form
 from app.api.v1.controllers.video import cut_video_handler, zoom_video_handler
+from app.api.v1.controllers.video.meme_controller import meme_video_handler
 from typing import Optional
 import logging
 
@@ -14,3 +15,11 @@ def cut_video_route(file: UploadFile = File(...), task_id: str = None):
 @router.post("/zoom")
 def zoom_video_route(file: UploadFile = File(...), task_id: str = None):
     return zoom_video_handler(file, task_id)
+
+@router.post("/meme")
+async def meme_video_route(
+    file: UploadFile = File(...), 
+    text: str = Form(...), 
+    template: str = Form("meme_modern_thin")
+):
+    return await meme_video_handler(file, text, template)
