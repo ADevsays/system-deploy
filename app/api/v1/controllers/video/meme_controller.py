@@ -76,7 +76,8 @@ async def meme_video_handler(
             drive_data = drive_service.upload_file(
                 file_path=temp_output,
                 filename=f"meme_{file.filename}",
-                mime_type='video/mp4'
+                mime_type='video/mp4',
+                folder_id=settings.GOOGLE_DRIVE_MEME_FOLDER_ID
             )
             
             # Limpiar el archivo de salida

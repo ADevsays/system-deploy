@@ -65,7 +65,7 @@ class GoogleDriveService:
         logger.info("Google Drive authentication successful")
 
     
-    def upload_file(self, file_path: str, filename: str, mime_type: str = 'audio/mpeg') -> str:
+    def upload_file(self, file_path: str, filename: str, mime_type: str = 'audio/mpeg', folder_id: Optional[str] = None) -> dict:
         """
         Sube un archivo a Google Drive y retorna el enlace compartido.
         
@@ -73,22 +73,26 @@ class GoogleDriveService:
             file_path: Ruta local del archivo a subir
             filename: Nombre con el que se guardará en Drive
             mime_type: Tipo MIME del archivo
+            folder_id: ID de la carpeta de destino (opcional)
             
         Returns:
-            URL pública del archivo en Google Drive
+            Dict con drive_url y file_id
         """
         # Autenticar automáticamente si no está autenticado
         if not self.service:
             logger.info("Service not initialized, authenticating...")
             self.authenticate()
         
-        if not settings.GOOGLE_DRIVE_FOLDER_ID:
-            raise ValueError("GOOGLE_DRIVE_FOLDER_ID not configured in .env")
+        # Usar folder_id proporcionado o el ID por defecto de settings
+        target_folder_id = folder_id or settings.GOOGLE_DRIVE_AUDIO_FOLDER_ID
+        
+        if not target_folder_id:
+            raise ValueError("No Google Drive folder ID provided or configured")
         
         try:
             file_metadata = {
                 'name': filename,
-                'parents': [settings.GOOGLE_DRIVE_FOLDER_ID]
+                'parents': [target_folder_id]
             }
             
             media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)

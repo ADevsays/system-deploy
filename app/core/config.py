@@ -20,7 +20,8 @@ else:
 
 class Settings:
     TEMP_DIR: str = os.getenv("TEMP_DIR", "/app/temp")
-    GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
+    GOOGLE_DRIVE_AUDIO_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_AUDIO_FOLDER_ID", "")
+    GOOGLE_DRIVE_MEME_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_MEME_FOLDER_ID", "")
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
