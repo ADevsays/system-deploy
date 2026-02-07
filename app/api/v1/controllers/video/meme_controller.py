@@ -25,7 +25,8 @@ def generate_task_id():
 async def meme_video_handler(
     file: UploadFile = File(...), 
     text: str = Form(...), 
-    template: str = Form("meme_modern_thin")
+    template: str = Form("meme_modern_thin"),
+    return_file: bool = False
 ):
     temp_file = None
     temp_output = None
@@ -80,18 +81,43 @@ async def meme_video_handler(
                 folder_id=settings.GOOGLE_DRIVE_MEME_FOLDER_ID
             )
             
-            # Limpiar el archivo de salida
-            if os.path.exists(temp_output):
-                os.remove(temp_output)
-            
-            return JSONResponse({
-                "success": True,
-                "task_id": task_id,
-                "drive_link": drive_data["drive_url"],
-                "file_id": drive_data["file_id"],
-                "filename": file.filename,
-                "message": "Meme generado y subido a Google Drive correctamente"
-            })
+            # Limpiar el archivo de salida si no se va a retornar como archivo
+            if not return_file:
+                if os.path.exists(temp_output):
+                    os.remove(temp_output)
+                
+                return JSONResponse({
+                    "success": True,
+                    "task_id": task_id,
+                    "drive_link": drive_data["drive_url"],
+                    "file_id": drive_data["file_id"],
+                    "filename": file.filename,
+                    "message": "Meme generado y subido a Google Drive correctamente"
+                })
+            else:
+                # Retornar el archivo directamente para n8n/Telegram
+                from fastapi.responses import FileResponse
+                from fastapi import BackgroundTasks
+                
+                # Función para limpiar el archivo de salida después de enviarlo
+                def cleanup():
+                    if temp_output and os.path.exists(temp_output):
+                        os.remove(temp_output)
+                
+                tasks = BackgroundTasks()
+                tasks.add_task(cleanup)
+                
+                return FileResponse(
+                    path=temp_output,
+                    filename=f"meme_{file.filename}",
+                    media_type='video/mp4',
+                    background=tasks,
+                    headers={
+                        "X-Drive-Link": drive_data["drive_url"],
+                        "X-File-ID": drive_data["file_id"],
+                        "X-Task-ID": task_id
+                    }
+                )
             
         except Exception as e:
             logger.error(f"Error subiendo a Google Drive: {str(e)}")

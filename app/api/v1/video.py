@@ -20,6 +20,7 @@ def zoom_video_route(file: UploadFile = File(...), task_id: str = None):
 async def meme_video_route(
     file: UploadFile = File(...), 
     text: str = Form(...), 
-    template: str = Form("meme_modern_thin")
+    template: str = Form("meme_modern_thin"),
+    return_file: bool = Form(False)
 ):
-    return await meme_video_handler(file, text, template)
+    return await meme_video_handler(file, text, template, return_file)
