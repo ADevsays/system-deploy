@@ -26,10 +26,18 @@ async def meme_video_handler(
     file: UploadFile = File(...), 
     text: str = Form(...), 
     template: str = Form("meme_modern_thin"),
+    color: str = Form("white"),
     return_file: bool = False
 ):
     temp_file = None
     temp_output = None
+    
+    # Mapeo de colores a formato ASS (&HBBGGRR)
+    color_map = {
+        "white": "&H00FFFFFF",
+        "black": "&H00000000"
+    }
+    target_color = color_map.get(color.lower(), "&H00FFFFFF")
     
     task_id = generate_task_id()
     
@@ -61,6 +69,7 @@ async def meme_video_handler(
                 video_template = VideoTemplate.MEME_THIN
             
             style_template = StyleRegistry.resolve(video_template)
+            style_template.primary_color = target_color
 
             # 5. Generar Meme
             logger.info(f"Iniciando generación de meme con texto: {text}")

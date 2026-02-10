@@ -21,6 +21,7 @@ async def meme_video_route(
     file: UploadFile = File(...), 
     text: str = Form(...), 
     template: str = Form("meme_modern_thin"),
+    color: str = Form("white"),
     return_file: bool = Form(False)
 ):
-    return await meme_video_handler(file, text, template, return_file)
+    return await meme_video_handler(file, text, template, color, return_file)
