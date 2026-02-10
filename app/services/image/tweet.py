@@ -5,10 +5,11 @@ import logging
 from dataclasses import replace
 from pathlib import Path
 from app.core.video_styles import TextStyle
+from app.core.config import BASE_DIR
 
 logger = logging.getLogger(__name__)
 
-ASSETS_DIR = Path(__file__).resolve().parent.parent.parent / "assets" / "tweet"
+ASSETS_DIR = BASE_DIR / "app" / "assets" / "tweet"
 BACKGROUND_PATH = str(ASSETS_DIR / "background.png")
 AVATAR_PATH = str(ASSETS_DIR / "avatar.png")
 VERIFIED_PATH = str(ASSETS_DIR / "verified.png")
