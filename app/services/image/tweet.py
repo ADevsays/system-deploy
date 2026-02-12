@@ -13,6 +13,7 @@ ASSETS_DIR = BASE_DIR / "app" / "assets" / "tweet"
 BACKGROUND_PATH = str(ASSETS_DIR / "background.png")
 AVATAR_PATH = str(ASSETS_DIR / "avatar.png")
 VERIFIED_PATH = str(ASSETS_DIR / "verified.png")
+FONTS_DIR = str(BASE_DIR / "app" / "assets" / "fonts")
 
 CANVAS_WIDTH = 1080
 CANVAS_HEIGHT = 1080
@@ -160,7 +161,7 @@ def generate_tweet_image(text: str) -> str:
 
         composed = background.overlay(_build_avatar_stream(), x=AVATAR_X, y=AVATAR_Y)
         composed = composed.overlay(_build_badge_stream(), x=BADGE_X, y=BADGE_Y)
-        composed = composed.filter('ass', filename=ass_rel_path)
+        composed = composed.filter('ass', filename=ass_rel_path, fontsdir=FONTS_DIR)
 
         (
             ffmpeg.output(composed, output_path, vframes=1)
