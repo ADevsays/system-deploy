@@ -34,7 +34,7 @@ _USERNAME_STYLE = TextStyle(
     alignment=7,
     margin_h=0,
     margin_v=0,
-    font_size_ratio=0.087,
+    font_size_ratio=0.096,
     pos_x_ratio=0.28,
     pos_y_ratio=0.305,
 )
@@ -47,7 +47,7 @@ _HANDLE_STYLE = TextStyle(
     alignment=7,
     margin_h=0,
     margin_v=0,
-    font_size_ratio=0.051,
+    font_size_ratio=0.056,
     pos_x_ratio=0.28,
     pos_y_ratio=0.36,
 )
@@ -60,7 +60,7 @@ _MAIN_TEXT_STYLE = TextStyle(
     alignment=7,
     margin_h=0,
     margin_v=0,
-    font_size_ratio=0.070,
+    font_size_ratio=0.077,
     pos_x_ratio=0.0,
     pos_y_ratio=0.0,
 )
