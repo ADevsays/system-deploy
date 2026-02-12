@@ -22,8 +22,8 @@ AVATAR_X = 120
 AVATAR_Y = 300
 
 BADGE_SIZE = 42
-BADGE_X = 540
-BADGE_Y = 335
+BADGE_X = 548
+BADGE_Y = 342
 
 _USERNAME_STYLE = TextStyle(
     font_name="Arial",
@@ -52,7 +52,7 @@ _HANDLE_STYLE = TextStyle(
 )
 
 _MAIN_TEXT_STYLE = TextStyle(
-    font_name="Arial",
+    font_name="Poppins",
     primary_color="&H00FFFFFF",
     bold=False,
     outline=0,

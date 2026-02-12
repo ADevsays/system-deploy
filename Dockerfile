@@ -4,7 +4,16 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     ffmpeg \
+    fontconfig \
+    wget \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/share/fonts/poppins && \
+    wget -q "https://fonts.google.com/download?family=Poppins" -O /tmp/poppins.zip && \
+    unzip -o /tmp/poppins.zip -d /usr/share/fonts/poppins && \
+    rm /tmp/poppins.zip && \
+    fc-cache -fv
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
