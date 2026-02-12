@@ -21,25 +21,25 @@ AVATAR_SIZE = 160
 AVATAR_X = 120
 AVATAR_Y = 300
 
-BADGE_SIZE = 42
-BADGE_X = 548
-BADGE_Y = 342
+BADGE_SIZE = 58
+BADGE_X = 600
+BADGE_Y = 340
 
 _USERNAME_STYLE = TextStyle(
-    font_name="Arial",
+    font_name="Poppins",
     primary_color="&H00FFFFFF",
     bold=True,
     outline=0,
     alignment=7,
     margin_h=0,
     margin_v=0,
-    font_size_ratio=0.052,
+    font_size_ratio=0.065,
     pos_x_ratio=0.28,
     pos_y_ratio=0.305,
 )
 
 _HANDLE_STYLE = TextStyle(
-    font_name="Arial",
+    font_name="Poppins",
     primary_color="&H00888888",
     bold=False,
     outline=0,
@@ -59,7 +59,7 @@ _MAIN_TEXT_STYLE = TextStyle(
     alignment=7,
     margin_h=0,
     margin_v=0,
-    font_size_ratio=0.060,
+    font_size_ratio=0.053,
     pos_x_ratio=0.0,
     pos_y_ratio=0.0,
 )
@@ -149,7 +149,14 @@ def generate_tweet_image(text: str) -> str:
         _generate_tweet_ass(ass_path, text)
         ass_rel_path = os.path.join("temp", f"tweet_{unique_id}.ass").replace("\\", "/")
 
-        background = ffmpeg.input(BACKGROUND_PATH).filter('scale', CANVAS_WIDTH, CANVAS_HEIGHT)
+        canvas = ffmpeg.input(f'color=black:s={CANVAS_WIDTH}x{CANVAS_HEIGHT}:d=1', f='lavfi')
+        bg_overlay = (
+            ffmpeg.input(BACKGROUND_PATH)
+            .filter('scale', CANVAS_WIDTH, CANVAS_HEIGHT)
+            .filter('format', 'rgba')
+            .filter('colorchannelmixer', aa=0.5)
+        )
+        background = canvas.overlay(bg_overlay)
 
         composed = background.overlay(_build_avatar_stream(), x=AVATAR_X, y=AVATAR_Y)
         composed = composed.overlay(_build_badge_stream(), x=BADGE_X, y=BADGE_Y)

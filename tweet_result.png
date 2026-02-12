@@ -1,0 +1,1 @@
+{"detail":"Error uploading tweet image to Google Drive: Failed to refresh access token: ('invalid_client: Unauthorized', {'error': 'invalid_client', 'error_description': 'Unauthorized'})"}
