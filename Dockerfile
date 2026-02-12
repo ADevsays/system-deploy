@@ -18,7 +18,8 @@ RUN mkdir -p /app/app/assets/fonts && \
     wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Bold.ttf" -O /app/app/assets/fonts/Poppins-Bold.ttf && \
     wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Medium.ttf" -O /app/app/assets/fonts/Poppins-Medium.ttf && \
     wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-SemiBold.ttf" -O /app/app/assets/fonts/Poppins-SemiBold.ttf && \
-    fc-cache -fv
+    fc-cache -fv && \
+    echo '<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><match target="pattern"><edit name="dpi" mode="assign"><double>96</double></edit></match></fontconfig>' > /etc/fonts/local.conf
 
 RUN mkdir -p /app/temp
 
