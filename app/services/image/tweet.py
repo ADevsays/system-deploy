@@ -155,7 +155,7 @@ def generate_tweet_image(text: str) -> str:
             ffmpeg.input(BACKGROUND_PATH)
             .filter('scale', CANVAS_WIDTH, CANVAS_HEIGHT)
             .filter('format', 'rgba')
-            .filter('colorchannelmixer', aa=0.5)
+            .filter('colorchannelmixer', aa=0.75)
         )
         background = canvas.overlay(bg_overlay)
 
