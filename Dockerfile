@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/share/fonts/poppins && \
-    wget -q "https://fonts.google.com/download?family=Poppins" -O /tmp/poppins.zip && \
-    unzip -o /tmp/poppins.zip -d /usr/share/fonts/poppins && \
-    rm /tmp/poppins.zip && \
+    wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Regular.ttf" -O /usr/share/fonts/poppins/Poppins-Regular.ttf && \
+    wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Bold.ttf" -O /usr/share/fonts/poppins/Poppins-Bold.ttf && \
+    wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Medium.ttf" -O /usr/share/fonts/poppins/Poppins-Medium.ttf && \
+    wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-SemiBold.ttf" -O /usr/share/fonts/poppins/Poppins-SemiBold.ttf && \
     fc-cache -fv
 
 COPY requirements.txt .
