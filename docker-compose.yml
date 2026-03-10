@@ -12,6 +12,7 @@ services:
       - GOOGLE_DRIVE_MEME_FOLDER_ID=${GOOGLE_DRIVE_MEME_FOLDER_ID}
       - GOOGLE_CREDENTIALS_PATH=/app/credentials.json
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
+      - XAI_API_KEY=${XAI_API_KEY}
     volumes:
       - ./credentials.json:/app/credentials.json:ro
       - ./token.json:/app/token.json

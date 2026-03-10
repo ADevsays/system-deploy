@@ -27,6 +27,15 @@ class Settings:
     GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
     GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "https://content.codecollab.cloud/rest/oauth2-credential/callback")
     CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+    XAI_API_KEY: str = os.getenv("XAI_API_KEY", "")
+    _GROK_SYSTEM_PROMPT_FILE: str = os.getenv("GROK_SYSTEM_PROMPT_FILE", str(BASE_DIR / "grok_system_prompt.txt"))
+
+    @classmethod
+    def get_grok_system_prompt(cls) -> str:
+        path = Path(cls._GROK_SYSTEM_PROMPT_FILE)
+        if path.exists():
+            return path.read_text(encoding="utf-8").strip()
+        return "You are a helpful assistant."
     
     @classmethod
     def ensure_temp_dir(cls):
