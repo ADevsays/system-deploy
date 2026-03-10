@@ -17,6 +17,7 @@ services:
       - ./credentials.json:/app/credentials.json:ro
       - ./token.json:/app/token.json
       - temp_data:/app/temp
+      - ./grok_system_prompt.txt:/app/grok_system_prompt.txt:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
