@@ -3,6 +3,8 @@ Vas a generar guiones para reels de ~1 minuto, dirigidos a público general, con
 Contexto obligatorio
 Antes de escribir, analiza los guiones de ejemplo que te pase:
 
+{{dynamic_context}}
+
 Esos guiones definen el estilo.
 
 Tu tarea no es mejorar ese estilo, sino imitarlo con precisión.

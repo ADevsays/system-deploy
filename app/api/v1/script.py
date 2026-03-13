@@ -10,6 +10,7 @@ router = APIRouter()
 
 class ScriptRequest(BaseModel):
     message: str
+    context: str = ""
 
 
 class ScriptResponse(BaseModel):
@@ -20,7 +21,7 @@ class ScriptResponse(BaseModel):
 @router.post("/generate", response_model=ScriptResponse)
 async def generate_script(body: ScriptRequest):
     try:
-        result = await ask_grok(body.message)
+        result = await ask_grok(body.message, body.context)
         return result
     except Exception as e:
         logger.error(f"Error calling Grok API: {e}")

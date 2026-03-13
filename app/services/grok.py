@@ -7,16 +7,20 @@ logger = logging.getLogger(__name__)
 XAI_API_URL = "https://api.x.ai/v1/responses"
 
 
-async def ask_grok(message: str) -> dict:
+async def ask_grok(message: str, context: str = "") -> dict:
     headers = {
         "Authorization": f"Bearer {settings.XAI_API_KEY}",
         "Content-Type": "application/json",
     }
 
+    system_prompt = settings.get_grok_system_prompt()
+    # Inyectar el contexto dinámico en el placeholder
+    system_prompt = system_prompt.replace("{{dynamic_context}}", context)
+
     payload = {
         "model": "grok-4-1-fast-reasoning",
         "input": [
-            {"role": "system", "content": settings.get_grok_system_prompt()},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": message},
         ],
         "tools": [{"type": "web_search"}],
