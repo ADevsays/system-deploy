@@ -7,13 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 env_path = BASE_DIR / ".env"
 env_example_path = BASE_DIR / ".env.example"
 
-# Cargar configuración (Prioridad: .env > .env.example)
+# Cargar configuración (Prioridad: OS/Docker Env > .env > .env.example)
 if env_path.exists():
     print(f"--- Loading config from {env_path} ---")
-    load_dotenv(dotenv_path=env_path, override=True)
+    load_dotenv(dotenv_path=env_path, override=False)
 elif env_example_path.exists():
     print(f"--- Loading config from {env_example_path} (Using example as fallback) ---")
-    load_dotenv(dotenv_path=env_example_path, override=True)
+    load_dotenv(dotenv_path=env_example_path, override=False)
 else:
     print("--- WARNING: No .env or .env.example found ---")
     load_dotenv()
