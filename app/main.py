@@ -1,11 +1,20 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.api.v1.routes import router
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.database import init_db
 import logging
 import sys
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(router)
 
 settings.ensure_temp_dir()

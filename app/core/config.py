@@ -28,6 +28,10 @@ class Settings:
     GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "https://content.codecollab.cloud/rest/oauth2-credential/callback")
     CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
     XAI_API_KEY: str = os.getenv("XAI_API_KEY", "")
+    ELEVEN_LABS_API: str = os.getenv("ELEVEN_LABS_API", "")
+    ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "")
+    ELEVENLABS_DEFAULT_CHARACTER_LIMIT: int = int(os.getenv("ELEVENLABS_DEFAULT_CHARACTER_LIMIT", "10000"))
+    ELEVENLABS_DB_PATH: str = os.getenv("ELEVENLABS_DB_PATH", str(BASE_DIR / "elevenlabs.db"))
     _GROK_SYSTEM_PROMPT_FILE: str = os.getenv("GROK_SYSTEM_PROMPT_FILE", str(BASE_DIR / "grok_system_prompt.txt"))
 
     @classmethod

@@ -5,6 +5,7 @@ from app.api.v1.video import router as video_router
 from app.api.v1.image import router as image_router
 from app.api.v1.tasks import router as tasks_router
 from app.api.v1.script import router as script_router
+from app.api.v1.elevenlabs import router as elevenlabs_router
 from app.api.v1.controllers.status_controller import status_controller
 from fastapi.responses import StreamingResponse
 import logging
@@ -25,4 +26,5 @@ router.include_router(audio_router, prefix="/audio", tags=["audio"])
 router.include_router(video_router, prefix="/video", tags=["video"])
 router.include_router(image_router, prefix="/image", tags=["image"])
 router.include_router(script_router, prefix="/script", tags=["script"])
+router.include_router(elevenlabs_router, prefix="/elevenlabs", tags=["elevenlabs"])
 

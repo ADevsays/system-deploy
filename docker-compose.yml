@@ -13,10 +13,14 @@ services:
       - GOOGLE_CREDENTIALS_PATH=/app/credentials.json
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
       - XAI_API_KEY=${XAI_API_KEY}
+      - ELEVEN_LABS_API=${ELEVEN_LABS_API}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - ELEVENLABS_DB_PATH=/app/data/elevenlabs.db
     volumes:
       - ./credentials.json:/app/credentials.json:ro
       - ./token.json:/app/token.json
       - temp_data:/app/temp
+      - elevenlabs_data:/app/data
       - ./grok_system_prompt.txt:/app/grok_system_prompt.txt:ro
     restart: unless-stopped
     healthcheck:
@@ -28,3 +32,4 @@ services:
 
 volumes:
   temp_data:
+  elevenlabs_data:
