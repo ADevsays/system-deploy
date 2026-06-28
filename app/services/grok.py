@@ -7,9 +7,10 @@ logger = logging.getLogger(__name__)
 XAI_API_URL = "https://api.x.ai/v1/responses"
 
 
-async def ask_grok(message: str, context: str = "") -> dict:
+async def ask_grok(message: str, context: str = "", api_key: str | None = None) -> dict:
+    key_to_use = api_key if api_key else settings.XAI_API_KEY
     headers = {
-        "Authorization": f"Bearer {settings.XAI_API_KEY}",
+        "Authorization": f"Bearer {key_to_use}",
         "Content-Type": "application/json",
     }
 
