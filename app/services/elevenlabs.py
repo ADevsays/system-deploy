@@ -18,10 +18,11 @@ async def text_to_speech(
     voice_id: str,
     text: str,
     model_id: str = "eleven_multilingual_v2",
-    stability: float = 0.5,
-    similarity_boost: float = 0.75,
-    style: float = 0.0,
+    stability: float = 0.48,
+    similarity_boost: float = 1.0,
+    style: float = 0.41,
     use_speaker_boost: bool = True,
+    velocity: float = 0.98,
     output_format: str = "mp3_44100_128",
 ) -> bytes:
     url = f"{ELEVENLABS_BASE_URL}/text-to-speech/{voice_id}"
@@ -34,6 +35,7 @@ async def text_to_speech(
             "similarity_boost": similarity_boost,
             "style": style,
             "use_speaker_boost": use_speaker_boost,
+            "velocity": velocity,
         },
     }
 

@@ -21,7 +21,7 @@ router = APIRouter()
 
 def require_admin(x_admin_key: str = Header(...)):
     if x_admin_key != settings.ADMIN_API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid admin key")
+        raise HTTPException(status_code=403, detail="Clave de administrador inválida")
     return True
 
 
@@ -45,14 +45,14 @@ def _user_to_response(user: dict) -> UserResponse:
 async def text_to_speech(body: TTSRequest):
     user = await users_repo.get_user_by_email(body.email)
     if user is None or not user["is_active"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=403, detail="Acceso denegado")
 
     char_count = len(body.text)
     remaining = user["character_limit"] - user["characters_used"]
     if char_count > remaining:
         raise HTTPException(
             status_code=429,
-            detail=f"Quota exceeded: {char_count} characters requested, {remaining} remaining",
+            detail=f"Cuota excedida: {char_count} caracteres solicitados, {remaining} restantes",
         )
 
     try:
@@ -64,11 +64,12 @@ async def text_to_speech(body: TTSRequest):
             similarity_boost=body.similarity_boost,
             style=body.style,
             use_speaker_boost=body.use_speaker_boost,
+            velocity=body.velocity,
             output_format=body.output_format,
         )
     except Exception as e:
         logger.error(f"ElevenLabs API error: {e}")
-        raise HTTPException(status_code=502, detail=f"ElevenLabs API error: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"Error en la API de ElevenLabs: {str(e)}")
 
     await users_repo.consume_characters(body.email, char_count)
     logger.info(f"TTS completed for {body.email}: {char_count} characters consumed")
@@ -87,14 +88,14 @@ async def list_voices():
         return await elevenlabs_service.list_voices()
     except Exception as e:
         logger.error(f"ElevenLabs API error listing voices: {e}")
-        raise HTTPException(status_code=502, detail=f"ElevenLabs API error: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"Error en la API de ElevenLabs: {str(e)}")
 
 
 @router.get("/usage/{email}", response_model=UsageResponse)
 async def get_usage(email: str):
     user = await users_repo.get_user_by_email(email)
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     usage_pct = (user["characters_used"] / user["character_limit"] * 100) if user["character_limit"] > 0 else 0
     return UsageResponse(
@@ -120,7 +121,7 @@ async def admin_list_users():
 async def admin_create_user(body: UserCreate):
     existing = await users_repo.get_user_by_email(body.email)
     if existing:
-        raise HTTPException(status_code=409, detail="User already exists")
+        raise HTTPException(status_code=409, detail="El usuario ya existe")
 
     try:
         user = await users_repo.create_user(body.email, body.character_limit)
@@ -134,7 +135,7 @@ async def admin_create_user(body: UserCreate):
 async def admin_get_user(email: str):
     user = await users_repo.get_user_by_email(email)
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return _user_to_response(user)
 
 
@@ -142,7 +143,7 @@ async def admin_get_user(email: str):
 async def admin_update_limit(email: str, body: UserLimitUpdate):
     user = await users_repo.get_user_by_email(email)
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     updated = await users_repo.update_user_limit(email, body.character_limit)
     return _user_to_response(updated)
@@ -152,7 +153,7 @@ async def admin_update_limit(email: str, body: UserLimitUpdate):
 async def admin_update_status(email: str, body: UserStatusUpdate):
     user = await users_repo.get_user_by_email(email)
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     updated = await users_repo.update_user_status(email, body.is_active)
     return _user_to_response(updated)
@@ -162,7 +163,7 @@ async def admin_update_status(email: str, body: UserStatusUpdate):
 async def admin_reset_usage(email: str, _=Depends(require_admin)):
     user = await users_repo.get_user_by_email(email)
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     updated = await users_repo.reset_usage(email)
     return _user_to_response(updated)
@@ -172,5 +173,5 @@ async def admin_reset_usage(email: str, _=Depends(require_admin)):
 async def admin_delete_user(email: str):
     deleted = await users_repo.delete_user(email)
     if not deleted:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"detail": f"User {email} deleted"}
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"detail": f"Usuario {email} eliminado"}
