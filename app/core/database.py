@@ -24,7 +24,11 @@ async def get_db() -> aiosqlite.Connection:
 
 
 async def init_db():
+    import os
     logger.info(f"Initializing ElevenLabs database at {settings.ELEVENLABS_DB_PATH}")
+    db_dir = os.path.dirname(settings.ELEVENLABS_DB_PATH)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
     async with aiosqlite.connect(settings.ELEVENLABS_DB_PATH) as db:
         await db.execute(CREATE_TABLE_SQL)
         await db.commit()
