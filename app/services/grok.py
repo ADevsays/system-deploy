@@ -19,7 +19,8 @@ async def ask_grok(message: str, context: str = "", api_key: str | None = None) 
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 
     payload = {
-        "model": "grok-4-1-fast-reasoning",
+        "model": "grok-4.3",
+        "reasoning_effort": "low",
         "input": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": message},
