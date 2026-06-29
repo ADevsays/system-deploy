@@ -8,7 +8,11 @@ XAI_API_URL = "https://api.x.ai/v1/responses"
 
 
 async def ask_grok(message: str, context: str = "", api_key: str | None = None) -> dict:
+    logger.info("Starting ask_grok")
     key_to_use = api_key if api_key else settings.XAI_API_KEY
+    if not key_to_use:
+        logger.warning("No API key provided or found in settings.XAI_API_KEY")
+
     headers = {
         "Authorization": f"Bearer {key_to_use}",
         "Content-Type": "application/json",
@@ -28,15 +32,33 @@ async def ask_grok(message: str, context: str = "", api_key: str | None = None) 
         "tools": [{"type": "web_search"}],
     }
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(XAI_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        data = response.json()
+    logger.info(f"Using XAI_API_URL: {XAI_API_URL}")
+    logger.info(f"Payload prepared: {payload}")
 
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        try:
+            logger.info("Sending request to xAI API...")
+            response = await client.post(XAI_API_URL, headers=headers, json=payload)
+            logger.info(f"Received response from xAI API. Status code: {response.status_code}")
+            
+            # Log first 500 characters of the raw response text for debugging
+            response_text = response.text
+            logger.info(f"Raw response body: {response_text[:500]}")
+            
+            response.raise_for_status()
+            data = response.json()
+        except httpx.HTTPStatusError as exc:
+            logger.error(f"HTTPStatusError from xAI: {exc.response.status_code} - {exc.response.text}")
+            raise
+        except Exception as exc:
+            logger.error(f"Error during xAI httpx request: {str(exc)}")
+            raise
+
+    logger.info("Extracting output text and citations from response data")
     output_text = _extract_output_text(data)
     citations = _extract_citations(data)
 
-    logger.info(f"Grok response received. Citations: {len(citations)}")
+    logger.info(f"Extraction complete. Output length: {len(output_text)}, Citations: {len(citations)}")
     return {"response": output_text, "citations": citations}
 
 
