@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class TemplateScriptRequest(BaseModel):
+    message: str
     context: str = ""
     provider: str = "grok"
     api_key: str | None = None
@@ -25,33 +26,20 @@ async def generate_template_script(body: TemplateScriptRequest):
     try:
         provider = body.provider.lower()
         
-        # Load the custom system prompt for this endpoint
-        raw_system_prompt = settings.get_template_script_prompt()
-
-        if "{{dynamic_context}}" in raw_system_prompt:
-            system_prompt = raw_system_prompt.replace("{{dynamic_context}}", body.context)
-            dummy_message = "Por favor, analiza los guiones que te he pasado en las instrucciones (system prompt) y extrae la plantilla siguiendo exactamente las restricciones solicitadas."
-        else:
-            system_prompt = raw_system_prompt
-            dummy_message = body.context
-
-        logger.info(f"--- SYSTEM PROMPT A ENVIAR ---\n{system_prompt}\n------------------------------")
-
-        # Dejamos el context vacío para que los servicios no vuelvan a inyectar
-        dummy_context = ""
+        system_prompt = settings.get_template_script_prompt()
 
         if provider == "grok":
             logger.info("Routing request to Grok service")
-            result = await ask_grok(body.context, dummy_context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_grok(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "openai":
             logger.info("Routing request to OpenAI service")
-            result = await ask_openai(body.context, dummy_context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_openai(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "gemini":
             logger.info("Routing request to Gemini service")
-            result = await ask_gemini(body.context, dummy_context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_gemini(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "claude":
             logger.info("Routing request to Claude service")
-            result = await ask_claude(body.context, dummy_context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_claude(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
         else:
             logger.error(f"Unsupported provider requested: {provider}")
             raise ValueError(f"Unsupported provider: {provider}")
