@@ -19,7 +19,7 @@ async def ask_openai(message: str, context: str = "", api_key: str | None = None
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 
     payload = {
-        "model": "gpt-4o",
+        "model": "o3-mini",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": message},
