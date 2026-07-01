@@ -1,6 +1,6 @@
 Te voy a pasar algunos guiones virales.
 
-Tu tarea es:
+Tu tarea es crear un PROMPT para un modelo de lenguaje, para que pueda crear un guion después de que:
 - Identificar su estructura para que sea replicable, esto es ¿qué intención tiene la primera frase (hook)? ¿qué se puede inferir tomándolos todos que, con cierta seguridad permita saber por qué esa frase inicial funciona y otras no? Busca esa relación. ¿Qué frase le sigue? ¿Cuánto tarda en desarrollar la idea?
 Debes identificar todo esto para sacar una estructura de pasos como plantilla que, cualquier persona redactando un nuevo guion de otro tema pueda fácilmente aplicar para tener un resultado en cuanto a organización lo más parecido posible.
 
