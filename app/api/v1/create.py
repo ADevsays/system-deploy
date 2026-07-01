@@ -26,10 +26,16 @@ async def generate_template_script(body: TemplateScriptRequest):
         provider = body.provider.lower()
         
         # Load the custom system prompt for this endpoint
-        system_prompt = settings.get_template_script_prompt()
+        raw_system_prompt = settings.get_template_script_prompt()
 
-        # Pasamos body.context como el mensaje del usuario, para que el modelo lo reciba directamente
-        # Y dejamos el context vacío para que {{dynamic_context}} se reemplace por vacío si aún está en el txt
+        if "{{dynamic_context}}" in raw_system_prompt:
+            system_prompt = raw_system_prompt.replace("{{dynamic_context}}", body.context)
+            dummy_message = "Por favor, analiza los guiones que te he pasado en las instrucciones (system prompt) y extrae la plantilla siguiendo exactamente las restricciones solicitadas."
+        else:
+            system_prompt = raw_system_prompt
+            dummy_message = body.context
+
+        # Dejamos el context vacío para que los servicios no vuelvan a inyectar
         dummy_context = ""
 
         if provider == "grok":
