@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 def get_gemini_api_url(api_key: str) -> str:
     return f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
-async def ask_gemini(message: str, context: str = "", api_key: str | None = None) -> dict:
+async def ask_gemini(message: str, context: str = "", api_key: str | None = None, system_prompt_override: str | None = None) -> dict:
     if not api_key:
         raise ValueError("Gemini API Key is required but was not provided.")
         
@@ -15,7 +15,7 @@ async def ask_gemini(message: str, context: str = "", api_key: str | None = None
         "Content-Type": "application/json",
     }
 
-    system_prompt = settings.get_grok_system_prompt()
+    system_prompt = system_prompt_override if system_prompt_override is not None else settings.get_grok_system_prompt()
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 
     payload = {

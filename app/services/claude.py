@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
 
-async def ask_claude(message: str, context: str = "", api_key: str | None = None) -> dict:
+async def ask_claude(message: str, context: str = "", api_key: str | None = None, system_prompt_override: str | None = None) -> dict:
     if not api_key:
         raise ValueError("Claude API Key is required but was not provided.")
         
@@ -16,7 +16,7 @@ async def ask_claude(message: str, context: str = "", api_key: str | None = None
         "content-type": "application/json",
     }
 
-    system_prompt = settings.get_grok_system_prompt()
+    system_prompt = system_prompt_override if system_prompt_override is not None else settings.get_grok_system_prompt()
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 
     payload = {

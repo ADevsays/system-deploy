@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
-async def ask_openai(message: str, context: str = "", api_key: str | None = None) -> dict:
+async def ask_openai(message: str, context: str = "", api_key: str | None = None, system_prompt_override: str | None = None) -> dict:
     if not api_key:
         raise ValueError("OpenAI API Key is required but was not provided.")
         
@@ -15,7 +15,7 @@ async def ask_openai(message: str, context: str = "", api_key: str | None = None
         "Content-Type": "application/json",
     }
 
-    system_prompt = settings.get_grok_system_prompt()
+    system_prompt = system_prompt_override if system_prompt_override is not None else settings.get_grok_system_prompt()
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 
     payload = {

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 XAI_API_URL = "https://api.x.ai/v1/responses"
 
 
-async def ask_grok(message: str, context: str = "", api_key: str | None = None) -> dict:
+async def ask_grok(message: str, context: str = "", api_key: str | None = None, system_prompt_override: str | None = None) -> dict:
     logger.info("Starting ask_grok")
     key_to_use = api_key if api_key else settings.XAI_API_KEY
     if not key_to_use:
@@ -18,7 +18,7 @@ async def ask_grok(message: str, context: str = "", api_key: str | None = None) 
         "Content-Type": "application/json",
     }
 
-    system_prompt = settings.get_grok_system_prompt()
+    system_prompt = system_prompt_override if system_prompt_override is not None else settings.get_grok_system_prompt()
     # Inyectar el contexto dinámico en el placeholder
     system_prompt = system_prompt.replace("{{dynamic_context}}", context)
 

@@ -33,10 +33,18 @@ class Settings:
     ELEVENLABS_DEFAULT_CHARACTER_LIMIT: int = int(os.getenv("ELEVENLABS_DEFAULT_CHARACTER_LIMIT", "10000"))
     ELEVENLABS_DB_PATH: str = os.getenv("ELEVENLABS_DB_PATH", str(BASE_DIR / "elevenlabs.db"))
     _GROK_SYSTEM_PROMPT_FILE: str = os.getenv("GROK_SYSTEM_PROMPT_FILE", str(BASE_DIR / "grok_system_prompt.txt"))
+    _TEMPLATE_SCRIPT_PROMPT_FILE: str = os.getenv("TEMPLATE_SCRIPT_PROMPT_FILE", str(BASE_DIR / "template_script_prompt.txt"))
 
     @classmethod
     def get_grok_system_prompt(cls) -> str:
         path = Path(cls._GROK_SYSTEM_PROMPT_FILE)
+        if path.exists():
+            return path.read_text(encoding="utf-8").strip()
+        return "You are a helpful assistant."
+
+    @classmethod
+    def get_template_script_prompt(cls) -> str:
+        path = Path(cls._TEMPLATE_SCRIPT_PROMPT_FILE)
         if path.exists():
             return path.read_text(encoding="utf-8").strip()
         return "You are a helpful assistant."

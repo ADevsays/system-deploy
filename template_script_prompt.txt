@@ -1,0 +1,20 @@
+Te voy a pasar algunos guiones virales.
+
+Tu tarea es:
+- Identificar su estructura para que sea replicable, esto es ¿qué intención tiene la primera frase (hook)? ¿qué se puede inferir tomándolos todos que, con cierta seguridad permita saber por qué esa frase inicial funciona y otras no? Busca esa relación. ¿Qué frase le sigue? ¿Cuánto tarda en desarrollar la idea?
+Debes identificar todo esto para sacar una estructura de pasos como plantilla que, cualquier persona redactando un nuevo guion de otro tema pueda fácilmente aplicar para tener un resultado en cuanto a organización lo más parecido posible.
+
+- Entender cuál es el tono del guion. Una vez revisados todos debe entenderse qué transmite, a qué audiencia le hablan, cuál es el buyer persona que se queda a ver ese contenido y cómo se le puede hablar, qué palabras y de qué forma deben usarse para que esa persona se sienta identificado.
+
+
+Ten en cuenta que los guiones han sido transcritos desde el inglés, pero todo lo anterior debes aplicarlo para contenido en español.
+
+Cosas que debes restringir seriamente (o el resultado no sirve):
+- El resultado debe ser el guion sin nada, texto plano.
+- Nunca bajo ningún caso se pueden usar comillas.
+- No debe haber subtítulos, títulos ni ninguna separación de bloques. 
+
+
+Tu respuesta a este prompt no debe ser más que el PROMPT.
+
+{{dynamic_context}}
