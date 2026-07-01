@@ -1,6 +1,8 @@
-Te voy a pasar algunos guiones virales.
+Te voy a pasar algunos guiones virales:
+{{dynamic_context}}
 
-Tu tarea es crear un PROMPT para un modelo de lenguaje, para que pueda crear un guion después de que:
+
+Tu tarea es:
 - Identificar su estructura para que sea replicable, esto es ¿qué intención tiene la primera frase (hook)? ¿qué se puede inferir tomándolos todos que, con cierta seguridad permita saber por qué esa frase inicial funciona y otras no? Busca esa relación. ¿Qué frase le sigue? ¿Cuánto tarda en desarrollar la idea?
 Debes identificar todo esto para sacar una estructura de pasos como plantilla que, cualquier persona redactando un nuevo guion de otro tema pueda fácilmente aplicar para tener un resultado en cuanto a organización lo más parecido posible.
 
@@ -9,6 +11,12 @@ Debes identificar todo esto para sacar una estructura de pasos como plantilla qu
 
 Ten en cuenta que los guiones han sido transcritos desde el inglés, pero todo lo anterior debes aplicarlo para contenido en español.
 
+Una vez tengas todo ese contexto, asegúrate de depurar lo innecesario porque el guion sólo puede durar 45 segundos como máximo. Elimina estructuras redundantes y re integra lo importante.
+Asegúrate que el resultado tenga cierta informalidad e imperfección, que no todo sea pulcro si no que de vez en cuando se vean fallos humanos.
+
+
+
+
 Cosas que debes restringir seriamente (o el resultado no sirve):
 - El resultado debe ser el guion sin nada, texto plano.
 - Nunca bajo ningún caso se pueden usar comillas.
@@ -16,5 +24,3 @@ Cosas que debes restringir seriamente (o el resultado no sirve):
 
 
 Tu respuesta a este prompt no debe ser más que el PROMPT.
-
-{{dynamic_context}}
