@@ -27,6 +27,7 @@ async def generate_template_script(body: TemplateScriptRequest):
         provider = body.provider.lower()
         
         system_prompt = settings.get_template_script_prompt()
+        logger.info(f"--- SYSTEM PROMPT CARGADO ---\n{system_prompt}\n-----------------------------")
 
         if provider == "grok":
             logger.info("Routing request to Grok service")
