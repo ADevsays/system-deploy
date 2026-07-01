@@ -41,6 +41,10 @@ def _run_async_cut(task_id: str, temp_input: str, original_filename: str):
 
 
 def cut_audio_handler(background_tasks: BackgroundTasks, file: UploadFile = File(...), google_token: str = None, return_file: bool = False):
+    logger.info(f">>> RECEIVING REQUEST IN cut_audio_handler <<<")
+    logger.info(f"Filename: {file.filename}")
+    logger.info(f"return_file: {return_file}")
+    
     file_extension = os.path.splitext(file.filename)[1].lower()
     if file_extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -58,12 +62,14 @@ def cut_audio_handler(background_tasks: BackgroundTasks, file: UploadFile = File
         with open(temp_input, "wb") as b:
             shutil.copyfileobj(file.file, b)
 
+        logger.info(f"Starting async thread for task {task_id}")
         thread = threading.Thread(
             target=_run_async_cut,
             args=(task_id, temp_input, file.filename),
             daemon=True
         )
         thread.start()
+        logger.info(f"Thread started, returning JSONResponse immediately")
 
         return JSONResponse({
             "task_id": task_id,
