@@ -5,6 +5,7 @@ class Task:
         self.id = id
         self.porcentage = porcentage
         self.status = status
+        self.output_path = None
 
 class TaskManager:
     def __init__(self):
@@ -36,6 +37,13 @@ class TaskManager:
     def get_task(self, task_id):
         for task in self.tasks:
             if task.id == task_id:
+                return task
+        return None
+
+    def set_output_path(self, id, path):
+        for task in self.tasks:
+            if task.id == id:
+                task.output_path = path
                 return task
         return None
 
