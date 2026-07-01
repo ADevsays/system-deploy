@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class TemplateScriptRequest(BaseModel):
-    message: str
     context: str = ""
     provider: str = "grok"
     api_key: str | None = None
@@ -29,18 +28,21 @@ async def generate_template_script(body: TemplateScriptRequest):
         # Load the custom system prompt for this endpoint
         system_prompt = settings.get_template_script_prompt()
 
+        # Como todo está en el system_prompt + context, enviamos un mensaje genérico al modelo
+        dummy_message = "Por favor, analiza la información y genera la plantilla solicitada según las instrucciones."
+
         if provider == "grok":
             logger.info("Routing request to Grok service")
-            result = await ask_grok(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_grok(dummy_message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "openai":
             logger.info("Routing request to OpenAI service")
-            result = await ask_openai(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_openai(dummy_message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "gemini":
             logger.info("Routing request to Gemini service")
-            result = await ask_gemini(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_gemini(dummy_message, body.context, body.api_key, system_prompt_override=system_prompt)
         elif provider == "claude":
             logger.info("Routing request to Claude service")
-            result = await ask_claude(body.message, body.context, body.api_key, system_prompt_override=system_prompt)
+            result = await ask_claude(dummy_message, body.context, body.api_key, system_prompt_override=system_prompt)
         else:
             logger.error(f"Unsupported provider requested: {provider}")
             raise ValueError(f"Unsupported provider: {provider}")
