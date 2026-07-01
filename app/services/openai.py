@@ -25,6 +25,8 @@ async def ask_openai(message: str, context: str = "", api_key: str | None = None
             {"role": "user", "content": message},
         ]
     }
+    
+    logger.info(f"OpenAI Payload Messages: {payload['messages']}")
 
     async with httpx.AsyncClient(timeout=120.0) as client:
         response = await client.post(OPENAI_API_URL, headers=headers, json=payload)

@@ -31,9 +31,14 @@ async def generate_template_script(body: TemplateScriptRequest):
         if "{{dynamic_context}}" in raw_system_prompt:
             system_prompt = raw_system_prompt.replace("{{dynamic_context}}", body.context)
             dummy_message = "Por favor, analiza los guiones que te he pasado en las instrucciones (system prompt) y extrae la plantilla siguiendo exactamente las restricciones solicitadas."
+            logger.info("Etiqueta {{dynamic_context}} encontrada y reemplazada.")
         else:
             system_prompt = raw_system_prompt
             dummy_message = body.context
+            logger.info("Etiqueta {{dynamic_context}} NO encontrada. Enviando context como mensaje de usuario.")
+
+        logger.info(f"--- SYSTEM PROMPT A ENVIAR ---\n{system_prompt}\n------------------------------")
+        logger.info(f"--- MENSAJE DE USUARIO A ENVIAR ---\n{dummy_message}\n-----------------------------------")
 
         # Dejamos el context vacío para que los servicios no vuelvan a inyectar
         dummy_context = ""
