@@ -67,11 +67,12 @@ def cut_audio_handler(file: UploadFile = File(...), google_token: str = None, re
         try:
             if return_file:
                 with open(temp_output, "rb") as f:
-                    file_data = io.BytesIO(f.read())
+                    file_bytes = f.read()
                 os.remove(temp_output)
                 
-                return StreamingResponse(
-                    file_data,
+                from fastapi import Response
+                return Response(
+                    content=file_bytes,
                     media_type="audio/mpeg",
                     headers={"Content-Disposition": f'attachment; filename="{file.filename}"'}
                 )
