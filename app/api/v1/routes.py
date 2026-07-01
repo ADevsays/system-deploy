@@ -1,5 +1,5 @@
 # routes.py (principal)
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from app.api.v1.audio import router as audio_router
 from app.api.v1.video import router as video_router
 from app.api.v1.image import router as image_router
@@ -17,6 +17,19 @@ router = APIRouter()
 @router.get("/")
 async def api_status():
     return {"message": "API is running"}
+
+@router.get("/endpoints")
+async def get_endpoints(request: Request):
+    endpoints = []
+    for route in request.app.routes:
+        if hasattr(route, "methods") and hasattr(route, "path"):
+            endpoints.append({
+                "path": route.path,
+                "methods": list(route.methods),
+                "name": route.name,
+                "description": getattr(route, "description", None) or "Sin descripción"
+            })
+    return {"endpoints": endpoints}
 
 @router.get("/status/{task_id}")
 async def task_status(task_id:str):
