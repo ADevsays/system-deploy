@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks
 from fastapi import status as http_status
 from fastapi.responses import FileResponse
 import os
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/cut")
-def cut_audio_route(background_tasks: BackgroundTasks, file: UploadFile = File(...), google_token: Optional[str] = File(None), return_file: Optional[bool] = File(False)):
+def cut_audio_route(background_tasks: BackgroundTasks, file: UploadFile = File(...), google_token: Optional[str] = Form(None), return_file: Optional[bool] = Form(False)):
     return cut_audio_handler(background_tasks, file, google_token, return_file)
 
 
