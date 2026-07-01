@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./app ./app
 COPY grok_system_prompt.txt /app/grok_system_prompt.txt
+COPY template_script_prompt.txt /app/template_script_prompt.txt
 
 RUN mkdir -p /app/app/assets/fonts && \
     wget -q "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-Regular.ttf" -O /app/app/assets/fonts/Poppins-Regular.ttf && \

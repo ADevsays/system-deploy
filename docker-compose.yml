@@ -22,6 +22,7 @@ services:
       - temp_data:/app/temp
       - elevenlabs_data:/app/data
       - ./grok_system_prompt.txt:/app/grok_system_prompt.txt:ro
+      - ./template_script_prompt.txt:/app/template_script_prompt.txt:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
