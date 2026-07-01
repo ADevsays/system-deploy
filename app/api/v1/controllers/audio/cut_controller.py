@@ -25,7 +25,7 @@ def generate_task_id():
     logger.info(f"Created new task: {new_task.id}")
     return new_task.id
 
-def cut_audio_handler(file: UploadFile = File(...)):
+def cut_audio_handler(file: UploadFile = File(...), google_token: str = None, return_file: bool = False):
     temp_file = None
     temp_output = None
     
@@ -65,11 +65,30 @@ def cut_audio_handler(file: UploadFile = File(...)):
         from app.services.google_drive import drive_service
 
         try:
-            drive_data = drive_service.upload_file(
-                file_path=temp_output,
-                filename=file.filename,
-                mime_type='audio/mpeg'
-            )
+            if return_file:
+                with open(temp_output, "rb") as f:
+                    file_data = io.BytesIO(f.read())
+                os.remove(temp_output)
+                
+                return StreamingResponse(
+                    file_data,
+                    media_type="audio/mpeg",
+                    headers={"Content-Disposition": f'attachment; filename="{file.filename}"'}
+                )
+
+            if google_token:
+                drive_data = drive_service.upload_file_with_user_token(
+                    file_path=temp_output,
+                    filename=file.filename,
+                    access_token=google_token,
+                    mime_type='audio/mpeg'
+                )
+            else:
+                drive_data = drive_service.upload_file(
+                    file_path=temp_output,
+                    filename=file.filename,
+                    mime_type='audio/mpeg'
+                )
             
             os.remove(temp_output)
             

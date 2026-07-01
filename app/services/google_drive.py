@@ -123,4 +123,42 @@ class GoogleDriveService:
             logger.error(f"Error uploading file to Google Drive: {str(e)}")
             raise
 
+    def upload_file_with_user_token(self, file_path: str, filename: str, access_token: str, mime_type: str = 'audio/mpeg') -> dict:
+        """
+        Sube un archivo al Google Drive del propio usuario usando su access token.
+        Se guarda en el directorio raíz (Mi Unidad) del usuario.
+        """
+        try:
+            creds = Credentials(token=access_token)
+            user_service = build('drive', 'v3', credentials=creds)
+            
+            file_metadata = {
+                'name': filename
+                # Al no especificar 'parents', se guarda en el directorio raíz del usuario
+            }
+            
+            media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
+            
+            logger.info(f"Uploading {filename} to user's Google Drive...")
+            file = user_service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields='id'
+            ).execute()
+            
+            file_id = file.get('id')
+            logger.info(f"File uploaded successfully to user's Drive with ID: {file_id}")
+            
+            # No cambiamos los permisos a públicos automáticamente porque es el Drive del usuario.
+            # El usuario puede decidir qué hacer con su propio archivo en su propio Drive.
+            
+            return {
+                "drive_url": f"https://drive.google.com/file/d/{file_id}/view?usp=sharing",
+                "file_id": file_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Error uploading file to user's Google Drive: {str(e)}")
+            raise
+
 drive_service = GoogleDriveService()
