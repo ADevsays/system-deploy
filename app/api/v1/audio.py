@@ -35,6 +35,11 @@ def download_audio(task_id: str, background_tasks: BackgroundTasks):
 
     output_path = task.output_path
     filename = os.path.basename(output_path).replace("output_", "", 1)
+    
+    # Eliminar el prefijo "input_{task_id}_" que se añade en el modo asíncrono
+    prefix = f"input_{task_id}_"
+    if filename.startswith(prefix):
+        filename = filename[len(prefix):]
 
     def cleanup():
         if os.path.exists(output_path):
