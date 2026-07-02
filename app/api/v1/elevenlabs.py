@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 import logging
 
 from app.core.config import settings
@@ -47,28 +47,22 @@ async def text_to_speech(body: TTSRequest):
     
     # Check access and active status
     if user is None or not user["is_active"]:
-        return Response(
-            content=b"",
-            media_type="audio/mpeg",
-            headers={
-                "X-Processed": "false",
-                "X-Error-Reason": "Acceso denegado: La cuenta de usuario asociada a este correo no fue encontrada o ha sido desactivada."
-            }
-        )
+        return JSONResponse(content={
+            "processed": False,
+            "error": "Acceso denegado: La cuenta de usuario asociada a este correo no fue encontrada o ha sido desactivada."
+        })
 
     char_count = len(body.text)
     remaining = user["character_limit"] - user["characters_used"]
     
     # Check quota
     if char_count > remaining:
-        return Response(
-            content=b"",
-            media_type="audio/mpeg",
-            headers={
-                "X-Processed": "false",
-                "X-Error-Reason": f"Cuota excedida: Has solicitado {char_count} caracteres, pero tu cuenta solo tiene {remaining} caracteres disponibles."
-            }
-        )
+        return JSONResponse(content={
+            "processed": False,
+            "error": f"Cuota excedida: Has solicitado {char_count} caracteres, pero tu cuenta solo tiene {remaining} caracteres disponibles.",
+            "characters_requested": char_count,
+            "characters_remaining": remaining
+        })
 
     try:
         audio = await elevenlabs_service.text_to_speech(
@@ -84,14 +78,10 @@ async def text_to_speech(body: TTSRequest):
         )
     except Exception as e:
         logger.error(f"ElevenLabs API error: {e}")
-        return Response(
-            content=b"",
-            media_type="audio/mpeg",
-            headers={
-                "X-Processed": "false",
-                "X-Error-Reason": f"Error en la API de ElevenLabs: La generación de audio ha fallado. Detalles del proveedor: {str(e)}"
-            }
-        )
+        return JSONResponse(content={
+            "processed": False,
+            "error": f"Error en la API de ElevenLabs: La generación de audio ha fallado. Detalles del proveedor: {str(e)}"
+        })
 
     await users_repo.consume_characters(body.email, char_count)
     logger.info(f"TTS completed for {body.email}: {char_count} characters consumed")
