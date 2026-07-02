@@ -45,7 +45,23 @@ def cut_audio_handler(background_tasks: BackgroundTasks, file: UploadFile = File
     logger.info(f"Filename: {file.filename}")
     logger.info(f"return_file: {return_file}")
     
+    MIME_TO_EXT = {
+        "audio/mpeg": ".mp3",
+        "audio/mpga": ".mpga",
+        "audio/mp4": ".m4a",
+        "audio/x-m4a": ".m4a",
+        "audio/wav": ".wav",
+        "audio/x-wav": ".wav",
+        "audio/aac": ".aac",
+        "audio/flac": ".flac",
+        "audio/ogg": ".ogg",
+    }
+
     file_extension = os.path.splitext(file.filename)[1].lower()
+    if not file_extension and file.content_type:
+        file_extension = MIME_TO_EXT.get(file.content_type.lower(), "")
+        logger.info(f"No extension in filename, inferred '{file_extension}' from content_type '{file.content_type}'")
+
     if file_extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,

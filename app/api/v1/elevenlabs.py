@@ -87,12 +87,14 @@ async def text_to_speech(body: TTSRequest):
     logger.info(f"TTS completed for {body.email}: {char_count} characters consumed")
 
     content_type = "audio/mpeg" if "mp3" in body.output_format else "audio/wav"
+    ext = "mp3" if "mp3" in body.output_format else "wav"
     return Response(
         content=audio,
         media_type=content_type,
         headers={
             "X-Processed": "true",
-            "X-Characters-Used": str(char_count)
+            "X-Characters-Used": str(char_count),
+            "Content-Disposition": f'attachment; filename="audio.{ext}"'
         },
     )
 
