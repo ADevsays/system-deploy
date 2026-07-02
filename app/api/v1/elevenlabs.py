@@ -44,15 +44,30 @@ def _user_to_response(user: dict) -> UserResponse:
 @router.post("/tts")
 async def text_to_speech(body: TTSRequest):
     user = await users_repo.get_user_by_email(body.email)
+    
+    # Check access and active status
     if user is None or not user["is_active"]:
-        raise HTTPException(status_code=403, detail="Acceso denegado")
+        return Response(
+            content=b"",
+            media_type="audio/mpeg",
+            headers={
+                "X-Processed": "false",
+                "X-Error-Reason": "Acceso denegado: La cuenta de usuario asociada a este correo no fue encontrada o ha sido desactivada."
+            }
+        )
 
     char_count = len(body.text)
     remaining = user["character_limit"] - user["characters_used"]
+    
+    # Check quota
     if char_count > remaining:
-        raise HTTPException(
-            status_code=429,
-            detail=f"Cuota excedida: {char_count} caracteres solicitados, {remaining} restantes",
+        return Response(
+            content=b"",
+            media_type="audio/mpeg",
+            headers={
+                "X-Processed": "false",
+                "X-Error-Reason": f"Cuota excedida: Has solicitado {char_count} caracteres, pero tu cuenta solo tiene {remaining} caracteres disponibles."
+            }
         )
 
     try:
@@ -69,7 +84,14 @@ async def text_to_speech(body: TTSRequest):
         )
     except Exception as e:
         logger.error(f"ElevenLabs API error: {e}")
-        raise HTTPException(status_code=502, detail=f"Error en la API de ElevenLabs: {str(e)}")
+        return Response(
+            content=b"",
+            media_type="audio/mpeg",
+            headers={
+                "X-Processed": "false",
+                "X-Error-Reason": f"Error en la API de ElevenLabs: La generación de audio ha fallado. Detalles del proveedor: {str(e)}"
+            }
+        )
 
     await users_repo.consume_characters(body.email, char_count)
     logger.info(f"TTS completed for {body.email}: {char_count} characters consumed")
@@ -78,7 +100,10 @@ async def text_to_speech(body: TTSRequest):
     return Response(
         content=audio,
         media_type=content_type,
-        headers={"X-Characters-Used": str(char_count)},
+        headers={
+            "X-Processed": "true",
+            "X-Characters-Used": str(char_count)
+        },
     )
 
 
