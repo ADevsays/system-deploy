@@ -53,6 +53,5 @@ def download_audio(task_id: str, background_tasks: BackgroundTasks):
     return FileResponse(
         path=output_path,
         media_type="audio/mpeg",
-        filename=filename,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        filename=filename
     )
