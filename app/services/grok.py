@@ -24,7 +24,7 @@ async def ask_grok(message: str, context: str = "", api_key: str | None = None, 
 
     payload = {
         "model": "grok-4.3",
-        "reasoning_effort": "low",
+        "reasoning": {"effort": "low"},
         "input": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": message},
