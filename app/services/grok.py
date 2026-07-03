@@ -48,11 +48,12 @@ async def ask_grok(message: str, context: str = "", api_key: str | None = None, 
             response.raise_for_status()
             data = response.json()
         except httpx.HTTPStatusError as exc:
-            logger.error(f"HTTPStatusError from xAI: {exc.response.status_code} - {exc.response.text}")
-            raise
+            error_msg = f"{exc.response.status_code} - {exc.response.text}"
+            logger.error(f"HTTPStatusError from xAI: {error_msg}")
+            raise Exception(error_msg)
         except Exception as exc:
             logger.error(f"Error during xAI httpx request: {str(exc)}")
-            raise
+            raise Exception(str(exc))
 
     logger.info("Extracting output text and citations from response data")
     output_text = _extract_output_text(data)
