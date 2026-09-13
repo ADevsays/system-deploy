@@ -161,4 +161,28 @@ class GoogleDriveService:
             logger.error(f"Error uploading file to user's Google Drive: {str(e)}")
             raise
 
+    def delete_file(self, file_id_or_url: str) -> bool:
+        """
+        Deletes a file from Google Drive by its file ID or full Drive URL.
+        """
+        if not self.service:
+            logger.info("Service not initialized, authenticating...")
+            self.authenticate()
+
+        # Handle full Drive URL if passed instead of pure ID
+        import re
+        file_id = file_id_or_url.strip()
+        match = re.search(r'/d/([a-zA-Z0-9_-]+)', file_id)
+        if match:
+            file_id = match.group(1)
+
+        try:
+            logger.info(f"Deleting file with ID {file_id} from Google Drive...")
+            self.service.files().delete(fileId=file_id).execute()
+            logger.info(f"File {file_id} deleted successfully from Google Drive")
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting file {file_id} from Google Drive: {str(e)}")
+            raise
+
 drive_service = GoogleDriveService()

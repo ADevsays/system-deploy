@@ -1,0 +1,289 @@
+# Content Processing API - Complete Machine-Readable Guide for AI Agents
+> This file (`/llms.txt`) is the definitive, self-contained reference for autonomous AI agents, LLMs, and automated HTTP clients.
+> Target Base URL: `https://<your-host-domain>` (or `http://localhost:8000` in local dev).
+> Any AI agent given `https://<your-host-domain>/llms.txt` can understand and execute all operations below without human intervention.
+
+---
+
+## 1. System Architecture & Async Task Pattern
+
+Processing media (cutting silences, YouTube slicing, meme generation, etc.) requires time. The API implements a standardized asynchronous tracking loop:
+
+```
+[Agent] ---> GET /tasks/init --------------------------> Returns task_id
+[Agent] ---> POST /endpoint (with task_id) ------------> Begins processing
+[Agent] ---> Loop: GET /status/{task_id} (every 2-3s) -> Checks progress %
+[Agent] <--- Status: "completed" or final HTTP response -> Fetches result
+```
+
+### Task Lifecycle Endpoints:
+- **`GET /tasks/init`**:
+  Initializes a task session.
+  - Returns: `{"task_id": "<uuid-string>"}`
+- **`GET /status/{task_id}`**:
+  Inspects progress.
+  - Returns: `{"task": {"id": "<task_id>", "status": "pending|processing|completed|failed", "porcentage": 0-100}}`
+- **`GET /tasks/clean`**:
+  Maintenance route. Cleans old temporary folders.
+
+---
+
+## 2. YouTube Clips Engine
+
+### `POST /video/youtube-clips`
+Downloads a YouTube video, excises unwanted segments (ads, sponsors), segments into clips, requests viral titles and keywords from Grok AI, renders vertical 3:4 canvas with styled ASS subtitles, and uploads results to Google Drive (or returns local paths).
+
+- **Method**: `POST`
+- **Path**: `/video/youtube-clips`
+- **Content-Type**: `application/json`
+
+#### Request Body Parameters:
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `url` | string | **Yes** | — | Full YouTube video URL or ID (e.g. `https://www.youtube.com/watch?v=dQw4w9WgXcQ`). |
+| `task_id` | string | **Yes** | — | Task ID from `GET /tasks/init`. |
+| `num_clips` | integer | No | `null` | Exact number of clips to cut. |
+| `clip_duration` | integer | No | `180` | Duration in seconds per clip (default: 3 minutes). |
+| `composition_mode` | string | No | `"normal"` | `"normal"` (standard 3:4 bars) or `"fullscreen"` (blurred background). |
+| `add_cta` | boolean | No | `false` | When `true`, appends a 3-second animated channel outro/CTA card. |
+| `exclude_segments` | array | No | `[]` | List of intervals `[{"start": 10.0, "end": 25.5}]` in seconds to cut out before segmenting. |
+
+#### Example Request:
+```bash
+curl -X POST "https://<your-host-domain>/video/youtube-clips" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "task_id": "b3e9447a-...",
+    "num_clips": 3,
+    "clip_duration": 60,
+    "composition_mode": "normal",
+    "add_cta": true,
+    "exclude_segments": [{"start": 15.0, "end": 35.0}]
+  }'
+```
+
+#### Storage Behavior:
+- **No local storage**: All generated video clips are uploaded directly to Google Drive Folder: `11nrbGOByVtQHs2b1ipwTo41khIY1-V6F`.
+- Temporary files on the server are automatically purged immediately after upload.
+- The response returns public Google Drive URLs in `segments` and detailed file metadata in `files` (including `file_id` for deletion).
+
+#### Example Response:
+```json
+{
+  "success": true,
+  "task_id": "b3e9447a-...",
+  "segments": [
+    "https://drive.google.com/file/d/1A2B3C4D5E.../view?usp=sharing",
+    "https://drive.google.com/file/d/6F7G8H9I0J.../view?usp=sharing"
+  ],
+  "files": [
+    {
+      "file_id": "1A2B3C4D5E...",
+      "drive_url": "https://drive.google.com/file/d/1A2B3C4D5E.../view?usp=sharing",
+      "filename": "yt_clip_part1.mp4"
+    }
+  ],
+  "count": 2,
+  "folder_id": "11nrbGOByVtQHs2b1ipwTo41khIY1-V6F",
+  "message": "Se generaron y subieron 2 clips a Google Drive exitosamente"
+}
+```
+
+### 2.1. `DELETE /video/youtube-clips/{file_id}`
+Deletes a generated video clip from Google Drive to free up space.
+- **Method**: `DELETE`
+- **Path**: `/video/youtube-clips/{file_id}` (or `/video/drive/{file_id}`)
+- **Path Parameter**: `file_id` (Accepts either the raw Google Drive File ID `1A2B3C4D5E...` OR the full Drive URL `https://drive.google.com/file/d/1A2B3C4D5E.../view?usp=sharing`).
+- **Example Request**:
+  ```bash
+  curl -X DELETE "https://<your-host-domain>/video/youtube-clips/1A2B3C4D5E..."
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "file_id": "1A2B3C4D5E...",
+    "message": "Archivo eliminado de Google Drive correctamente"
+  }
+  ```
+
+---
+
+## 3. Video Processing Endpoints
+
+### 3.1. `POST /video/cut`
+Removes silence segments from an uploaded video file.
+- **Content-Type**: `multipart/form-data`
+- **Fields**:
+  - `file`: binary video file (`.mp4`, `.mov`, `.avi`, `.mkv`, `.flv`, `.wmv`, `.webm`).
+  - `task_id`: string (required).
+- **Response**: `{"success": true, "file_path": "...", "filename": "cut_video.mp4", "message": "..."}`
+
+### 3.2. `POST /video/zoom`
+Applies dynamic zoom and pan effect to keep audience engagement high.
+- **Content-Type**: `multipart/form-data`
+- **Fields**:
+  - `file`: binary video file.
+  - `task_id`: string (required).
+- **Response**: `{"success": true, "file_path": "...", "filename": "zoom_video.mp4"}`
+
+### 3.3. `POST /video/meme`
+Generates modern or classic meme video templates with top text overlay.
+- **Content-Type**: `multipart/form-data`
+- **Fields**:
+  - `file`: binary video file.
+  - `text`: string (meme caption text).
+  - `template`: string (`"meme_modern_thin"` default, or `"meme_classic_bold"`).
+  - `color`: string (`"white"` default, or `"black"`).
+  - `return_file`: boolean (`false` uploads to Google Drive and returns JSON with `drive_link`, `true` streams the `.mp4` file directly).
+- **Response (`return_file=false`)**:
+  ```json
+  {"success": true, "task_id": "...", "drive_link": "https://drive.google.com/...", "file_id": "...", "filename": "meme.mp4"}
+  ```
+
+---
+
+## 4. Audio Processing Endpoints
+
+### 4.1. `POST /audio/cut`
+Removes dead silence from beginning, middle, and end of audio.
+- **Content-Type**: `multipart/form-data`
+- **Fields**:
+  - `file`: binary audio (`.mp3`, `.wav`, `.m4a`, `.aac`, `.flac`, `.ogg`, `.mpga`).
+  - `google_token`: string (optional Google OAuth token).
+  - `return_file`: boolean (default: `false` = upload to Google Drive and return JSON; `true` = binary stream download).
+- **Response (`return_file=false`)**:
+  ```json
+  {"task_id": "...", "drive_link": "https://drive.google.com/...", "filename": "audio.mp3"}
+  ```
+
+### 4.2. `GET /audio/download/{task_id}`
+Downloads the processed audio file generated by an async task.
+- **Returns**: Binary stream (`audio/mpeg`) with cleanup after download.
+
+---
+
+## 5. Image & Tweet Card Engine
+
+### `POST /image/tweet`
+Renders a simulated viral tweet card with profile avatar and caption.
+- **Content-Type**: `multipart/form-data`
+- **Fields**:
+  - `text`: string (tweet content).
+  - `return_file`: boolean (default: `true` returns binary PNG image; `false` returns local path JSON).
+- **Response (`return_file=true`)**: Binary PNG image (`image/png`).
+
+---
+
+## 6. AI Script & Content Generation
+
+### 6.1. `POST /create/template_script`
+Generates structured video script content using a designated AI provider.
+- **Content-Type**: `application/json`
+- **Request Body**:
+  ```json
+  {
+    "message": "Tema del video...",
+    "context": "Contexto o tono...",
+    "provider": "grok", // Options: "grok", "openai", "gemini", "claude"
+    "api_key": null     // Optional custom API key; defaults to server key
+  }
+  ```
+- **Response**: `{"response": "Contenido generado..."}`
+
+### 6.2. `POST /script/generate`
+Direct prompt-to-script generator.
+- **Content-Type**: `application/json`
+- **Request Body**:
+  ```json
+  {
+    "message": "Escribe un guión corto sobre inteligencia artificial",
+    "context": "Tono entretenido para TikTok",
+    "provider": "grok",
+    "api_key": null
+  }
+  ```
+- **Response**: `{"response": "..."}`
+
+### 6.3. `POST /script/generate_from_template`
+Generates script strictly adhering to a prompt template, with optional bilingual (Spanish + English) JSON output.
+- **Content-Type**: `application/json`
+- **Request Body**:
+  ```json
+  {
+    "template": "System prompt or custom template...",
+    "tema": "Tema a desarrollar...",
+    "provider": "grok",
+    "bilingual": true // When true, returns {"es": "...", "en": "..."}
+  }
+  ```
+
+---
+
+## 7. ElevenLabs Text-to-Speech (TTS) & Quotas
+
+### 7.1. Public User Endpoints
+
+#### `POST /elevenlabs/tts`
+Generates high-fidelity voice audio while tracking character quotas per user email.
+- **Content-Type**: `application/json`
+- **Request Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "text": "Texto a convertir en voz...",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model_id": "eleven_multilingual_v2", // optional
+    "output_format": "mp3_44100_128"       // optional
+  }
+  ```
+- **Response**: Binary audio file (`audio/mpeg` or `audio/wav`).
+
+#### `GET /elevenlabs/voices`
+Lists all available ElevenLabs voices with their IDs and preview samples.
+- **Response**: `{"voices": [{"voice_id": "...", "name": "...", "category": "..."}]}`
+
+#### `GET /elevenlabs/usage/{email}`
+Checks remaining character quota for a user.
+- **Response**:
+  ```json
+  {
+    "email": "user@example.com",
+    "character_limit": 10000,
+    "characters_used": 1500,
+    "characters_remaining": 8500,
+    "is_active": true
+  }
+  ```
+
+### 7.2. Admin Endpoints (Require `X-Admin-Key` Header)
+- **`GET /elevenlabs/admin/users`**: List all users.
+- **`POST /elevenlabs/admin/users`**: Register user `{"email": "...", "character_limit": 10000}`.
+- **`GET /elevenlabs/admin/users/{email}`**: Get user profile.
+- **`PATCH /elevenlabs/admin/users/{email}/limit`**: Update quota `{"character_limit": 50000}`.
+- **`PATCH /elevenlabs/admin/users/{email}/status`**: Activate/Deactivate `{"is_active": true|false}`.
+- **`POST /elevenlabs/admin/users/{email}/reset`**: Reset characters used count to 0.
+- **`DELETE /elevenlabs/admin/users/{email}`**: Delete user record.
+
+---
+
+## 8. Server Discovery & Metadata Endpoints
+
+- **`GET /`**: Entrypoint with discovery navigation.
+- **`GET /llms.txt`**: This document (plain text).
+- **`GET /openapi.json`**: Standard OpenAPI 3.0 specification for automated tool calling.
+- **`GET /docs`**: Interactive Swagger UI.
+- **`GET /endpoints`**: Dynamic JSON array listing all registered routes.
+
+---
+
+## 9. HTTP Status Codes & Error Handling
+
+- **`200 OK`**: Operation completed successfully.
+- **`202 Accepted`**: Background processing in progress.
+- **`400 Bad Request`**: Missing parameter, invalid file extension, or bad format.
+- **`403 Forbidden`**: Invalid or missing `X-Admin-Key`.
+- **`404 Not Found`**: Task ID, file, or user not found.
+- **`410 Gone`**: Temporary file has expired or was already downloaded.
+- **`500 Internal Server Error`**: Processing error. Inspect `"detail"` string in the JSON response.

@@ -1,5 +1,8 @@
 # routes.py (principal)
+import os
+from pathlib import Path
 from fastapi import APIRouter, Request
+from fastapi.responses import PlainTextResponse, JSONResponse
 from app.api.v1.audio import router as audio_router
 from app.api.v1.video import router as video_router
 from app.api.v1.image import router as image_router
@@ -8,15 +11,49 @@ from app.api.v1.script import router as script_router
 from app.api.v1.elevenlabs import router as elevenlabs_router
 from app.api.v1.create import router as create_router
 from app.api.v1.controllers.status_controller import status_controller
-from fastapi.responses import StreamingResponse
+from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.get("/")
+
+@router.get("/", summary="Root Health Check & AI Agent Entrypoint")
 async def api_status():
-    return {"message": "API is running"}
+    return {
+        "status": "online",
+        "message": "Content Processing API is running",
+        "agent_instructions": "Read /llms.txt for autonomous agent guidelines, schemas, and usage examples.",
+        "discovery": {
+            "llms_txt": "/llms.txt",
+            "openapi_json": "/openapi.json",
+            "swagger_docs": "/docs",
+            "redoc": "/redoc",
+            "endpoints": "/endpoints"
+        }
+    }
+
+
+@router.get("/llms.txt", response_class=PlainTextResponse, summary="LLM Agent Usage Instructions")
+async def get_llms_txt():
+    """
+    Serves the standardized llms.txt guide for LLMs, agents, and scrapers.
+    """
+    candidates = [
+        settings.BASE_DIR / "llms.txt",
+        settings.BASE_DIR / "app" / "llms.txt",
+        Path("/app/llms.txt")
+    ]
+    for c in candidates:
+        if c.exists():
+            return PlainTextResponse(c.read_text(encoding="utf-8"), media_type="text/plain; charset=utf-8")
+    
+    return PlainTextResponse(
+        "# Content Processing API\nDocumentation file llms.txt not found on server.",
+        status_code=404,
+        media_type="text/plain; charset=utf-8"
+    )
+
 
 @router.get("/endpoints")
 async def get_endpoints(request: Request):
@@ -31,9 +68,11 @@ async def get_endpoints(request: Request):
             })
     return {"endpoints": endpoints}
 
+
 @router.get("/status/{task_id}")
-async def task_status(task_id:str):
+async def task_status(task_id: str):
     return await status_controller(task_id)
+
 
 router.include_router(tasks_router, prefix="/tasks", tags=["tasks"])
 router.include_router(audio_router, prefix="/audio", tags=["audio"])
@@ -42,4 +81,3 @@ router.include_router(image_router, prefix="/image", tags=["image"])
 router.include_router(script_router, prefix="/script", tags=["script"])
 router.include_router(elevenlabs_router, prefix="/elevenlabs", tags=["elevenlabs"])
 router.include_router(create_router, prefix="/create", tags=["create"])
-

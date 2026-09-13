@@ -19,9 +19,11 @@ else:
     load_dotenv()
 
 class Settings:
+    BASE_DIR: Path = BASE_DIR
     TEMP_DIR: str = os.getenv("TEMP_DIR", "/app/temp")
     GOOGLE_DRIVE_AUDIO_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_AUDIO_FOLDER_ID", "")
     GOOGLE_DRIVE_MEME_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_MEME_FOLDER_ID", "")
+    GOOGLE_DRIVE_YOUTUBE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_YOUTUBE_FOLDER_ID", "11nrbGOByVtQHs2b1ipwTo41khIY1-V6F")
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
