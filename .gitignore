@@ -5,6 +5,7 @@ results/
 .env
 credentials.json
 token.json
+cookies.txt
 __pycache__/
 *.pyc
 *.pyo

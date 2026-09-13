@@ -36,6 +36,10 @@ class Settings:
     ELEVENLABS_DB_PATH: str = os.getenv("ELEVENLABS_DB_PATH", str(BASE_DIR / "elevenlabs.db"))
     _GROK_SYSTEM_PROMPT_FILE: str = os.getenv("GROK_SYSTEM_PROMPT_FILE", str(BASE_DIR / "grok_system_prompt.txt"))
     _TEMPLATE_SCRIPT_PROMPT_FILE: str = os.getenv("TEMPLATE_SCRIPT_PROMPT_FILE", str(BASE_DIR / "template_script_prompt.txt"))
+    YOUTUBE_COOKIES_FILE: str = os.getenv("YOUTUBE_COOKIES_FILE", "/app/cookies.txt")
+    YOUTUBE_COOKIES_CONTENT: str = os.getenv("YOUTUBE_COOKIES_CONTENT", "")
+    YOUTUBE_PROXY: str = os.getenv("YOUTUBE_PROXY", "")
+    YOUTUBE_PLAYER_CLIENT: str = os.getenv("YOUTUBE_PLAYER_CLIENT", "android,web")
 
     @classmethod
     def get_grok_system_prompt(cls) -> str:

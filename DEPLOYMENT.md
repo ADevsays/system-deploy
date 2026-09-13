@@ -151,3 +151,13 @@ docker-compose down
 **Error: "Permission denied to upload to Drive"**
 - Verifica que el GOOGLE_DRIVE_FOLDER_ID sea correcto
 - Asegúrate de que la cuenta autenticada tenga permisos de escritura en la carpeta
+
+**Error: "Sign in to confirm you're not a bot" en YouTube Clips**
+YouTube bloquea las IPs de servidores/datacenter (Hetzner, DigitalOcean, AWS, etc.). Para resolverlo:
+1. Instala la extensión **"Get cookies.txt LOCALLY"** (o Cookie-Editor) en tu navegador.
+2. Inicia sesión en YouTube y exporta tus cookies en formato Netscape como `cookies.txt`.
+3. Sube el archivo `cookies.txt` al directorio raíz de `system-deploy` en tu VPS (o pega el contenido en la variable `YOUTUBE_COOKIES_CONTENT` de tu `.env`).
+4. Reconstruye el contenedor:
+   ```bash
+   docker-compose up -d --build
+   ```

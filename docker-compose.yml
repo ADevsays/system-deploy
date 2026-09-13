@@ -16,9 +16,14 @@ services:
       - ELEVEN_LABS_API=${ELEVEN_LABS_API}
       - ADMIN_API_KEY=${ADMIN_API_KEY}
       - ELEVENLABS_DB_PATH=/app/data/elevenlabs.db
+      - YOUTUBE_COOKIES_FILE=/app/cookies.txt
+      - YOUTUBE_COOKIES_CONTENT=${YOUTUBE_COOKIES_CONTENT:-}
+      - YOUTUBE_PROXY=${YOUTUBE_PROXY:-}
+      - YOUTUBE_PLAYER_CLIENT=${YOUTUBE_PLAYER_CLIENT:-android,web}
     volumes:
       - ./credentials.json:/app/credentials.json:ro
       - ./token.json:/app/token.json
+      - ./cookies.txt:/app/cookies.txt:ro
       - temp_data:/app/temp
       - elevenlabs_data:/app/data
       - ./grok_system_prompt.txt:/app/grok_system_prompt.txt:ro
