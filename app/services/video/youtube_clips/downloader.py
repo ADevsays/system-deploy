@@ -78,7 +78,60 @@ def _get_ytdlp_base_args() -> list[str]:
     return args
 
 
+def download_via_apify(url: str, output_dir: str, apify_token: str) -> str:
+    """
+    Downloads a YouTube video using Apify youtube-video-downloader actor,
+    bypassing datacenter IP blocks completely.
+    """
+    logger.info(f"Downloading YouTube video via Apify Actor: {url}")
+    payload = {
+        "videos": [{"url": url}],
+        "storeInKVStore": True,
+        "preferredFormat": "mp4",
+        "preferredQuality": "720p"
+    }
+
+    endpoint = f"https://api.apify.com/v2/acts/streamers~youtube-video-downloader/run-sync-get-dataset-items?token={apify_token}&timeout=360"
+    resp = requests.post(endpoint, json=payload, timeout=400)
+    if resp.status_code not in (200, 201):
+        raise Exception(f"Apify actor run failed (HTTP {resp.status_code}): {resp.text[:300]}")
+
+    items = resp.json()
+    if not items or not isinstance(items, list):
+        raise Exception(f"Invalid dataset response from Apify: {resp.text[:300]}")
+
+    file_url = items[0].get("downloadedFileUrl")
+    if not file_url:
+        raise Exception(f"No downloadedFileUrl returned by Apify: {items[0]}")
+
+    video_id = items[0].get("id", "yt_video")
+    dest_path = os.path.join(output_dir, f"{video_id}.mp4")
+    logger.info(f"Streaming video from Apify Storage to: {dest_path}")
+
+    with requests.get(file_url, stream=True, timeout=180) as r:
+        r.raise_for_status()
+        with open(dest_path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 1024):
+                if chunk:
+                    f.write(chunk)
+
+    if not os.path.exists(dest_path) or os.path.getsize(dest_path) == 0:
+        raise FileNotFoundError(f"Failed to save video from Apify to {dest_path}")
+
+    logger.info(f"Successfully downloaded video via Apify: {dest_path} ({os.path.getsize(dest_path)} bytes)")
+    return os.path.abspath(dest_path)
+
+
 def download_youtube_video(url: str, output_dir: str) -> str:
+    # 1. Try Apify if APIFY_TOKEN is configured
+    apify_token = os.getenv("APIFY_TOKEN", "").strip()
+    if apify_token:
+        try:
+            return download_via_apify(url, output_dir, apify_token)
+        except Exception as e:
+            logger.warning(f"Apify download failed, falling back to yt-dlp: {e}")
+
+    # 2. Fallback to local yt-dlp
     output_template = os.path.join(output_dir, "%(id)s.%(ext)s")
     base_args = _get_ytdlp_base_args()
     cmd = [
@@ -100,8 +153,38 @@ def download_youtube_video(url: str, output_dir: str) -> str:
 
 def get_youtube_metadata(url: str, temp_dir: str = None) -> dict:
     """
-    Extracts metadata using yt-dlp and downloads thumbnail if temp_dir is provided.
+    Extracts metadata using official YouTube oEmbed (fast, no bot blocks)
+    and falls back to yt-dlp.
     """
+    # 1. Try official oEmbed API first (fast and immune to bot blocks)
+    try:
+        oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
+        oembed_resp = requests.get(oembed_url, timeout=6)
+        if oembed_resp.status_code == 200:
+            data = oembed_resp.json()
+            meta = {
+                "title": data.get("title", "Video de YouTube"),
+                "uploader": data.get("author_name", "YouTube"),
+                "thumbnail_url": data.get("thumbnail_url", ""),
+                "thumbnail_path": None
+            }
+
+            if temp_dir and meta["thumbnail_url"]:
+                try:
+                    thumb_resp = requests.get(meta["thumbnail_url"], timeout=10)
+                    if thumb_resp.status_code == 200:
+                        thumb_path = os.path.join(temp_dir, "thumb.jpg")
+                        with open(thumb_path, "wb") as f:
+                            f.write(thumb_resp.content)
+                        meta["thumbnail_path"] = thumb_path
+                except Exception as e:
+                    logger.warning(f"Error downloading thumbnail: {str(e)}")
+
+            return meta
+    except Exception as e:
+        logger.warning(f"oEmbed metadata failed, trying yt-dlp: {e}")
+
+    # 2. Fallback to yt-dlp
     try:
         base_args = _get_ytdlp_base_args()
         cmd = ["yt-dlp", *base_args, "-J", "--no-playlist", url]

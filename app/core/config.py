@@ -40,6 +40,7 @@ class Settings:
     YOUTUBE_COOKIES_CONTENT: str = os.getenv("YOUTUBE_COOKIES_CONTENT", "")
     YOUTUBE_PROXY: str = os.getenv("YOUTUBE_PROXY", "")
     YOUTUBE_PLAYER_CLIENT: str = os.getenv("YOUTUBE_PLAYER_CLIENT", "android,web")
+    APIFY_TOKEN: str = os.getenv("APIFY_TOKEN", "")
 
     @classmethod
     def get_grok_system_prompt(cls) -> str:
