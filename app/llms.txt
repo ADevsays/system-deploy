@@ -43,6 +43,8 @@ Downloads a YouTube video, excises unwanted segments (ads, sponsors), segments i
 | `url` | string | **Yes** | — | Full YouTube video URL or ID (e.g. `https://www.youtube.com/watch?v=dQw4w9WgXcQ`). |
 | `task_id` | string | **Yes** | — | Task ID from `GET /tasks/init`. |
 | `quality` | string/integer | No | `"720p"` | Video download quality: `"480p"`, `"720p"`, or `"1080p"` (also accepts `480`, `720`, `1080`). Default fallback set via `YOUTUBE_DOWNLOAD_QUALITY`. |
+| `start_time` | string | No | `null` | Optional start timestamp to download/trim from (e.g. `"00:00:00"`). Cuts down Apify execution time drastically for long videos. |
+| `end_time` | string | No | `null` | Optional end timestamp to download/trim to (e.g. `"00:01:20"`). |
 | `num_clips` | integer | No | `null` | Exact number of clips to cut. |
 | `clip_duration` | integer | No | `180` | Duration in seconds per clip (default: 3 minutes). |
 | `composition_mode` | string | No | `"normal"` | `"normal"` (standard 3:4 bars) or `"fullscreen"` (blurred background). |
@@ -57,7 +59,9 @@ curl -X POST "https://<your-host-domain>/video/youtube-clips" \
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "task_id": "b3e9447a-...",
     "quality": "720p",
-    "num_clips": 3,
+    "start_time": "00:00:00",
+    "end_time": "00:01:20",
+    "num_clips": 1,
     "clip_duration": 60,
     "composition_mode": "normal",
     "add_cta": true,

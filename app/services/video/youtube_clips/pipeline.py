@@ -20,7 +20,9 @@ def process_youtube_url(
     clip_duration: int = None,
     composition_mode: str = "normal",
     add_cta: bool = False,
-    quality: str = "720p"
+    quality: str = "720p",
+    start_time: str = None,
+    end_time: str = None
 ) -> list[str]:
     """
     Synchronous wrapper for async YouTube clip processing.
@@ -34,7 +36,9 @@ def process_youtube_url(
             clip_duration=clip_duration,
             composition_mode=composition_mode,
             add_cta=add_cta,
-            quality=quality
+            quality=quality,
+            start_time=start_time,
+            end_time=end_time
         )
     )
 
@@ -47,7 +51,9 @@ async def _process_youtube_url_async(
     clip_duration: int = None,
     composition_mode: str = "normal",
     add_cta: bool = False,
-    quality: str = "720p"
+    quality: str = "720p",
+    start_time: str = None,
+    end_time: str = None
 ) -> list[str]:
     url_match = re.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', url)
     if url_match:
@@ -66,8 +72,14 @@ async def _process_youtube_url_async(
         thumbnail_path = youtube_meta.get("thumbnail_path")
         
         # 2. Download
-        logger.info(f"Downloading YouTube video: {url} (quality: {quality})")
-        raw_file = download_youtube_video(url, temp_dir, quality=quality)
+        logger.info(f"Downloading YouTube video: {url} (quality: {quality}, start: {start_time}, end: {end_time})")
+        raw_file = download_youtube_video(
+            url,
+            temp_dir,
+            quality=quality,
+            start_time=start_time,
+            end_time=end_time
+        )
 
         # 3. Trim / Exclude segments
         if exclude_segments:

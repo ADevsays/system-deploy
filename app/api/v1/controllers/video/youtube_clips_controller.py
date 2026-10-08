@@ -22,9 +22,11 @@ def youtube_clips_handler(
     clip_duration: int = None,
     composition_mode: str = "normal",
     add_cta: bool = False,
-    quality: str = "720p"
+    quality: str = "720p",
+    start_time: str = None,
+    end_time: str = None
 ):
-    logger.info(f"Starting YouTube clips handler for URL: {url} (quality: {quality})")
+    logger.info(f"Starting YouTube clips handler for URL: {url} (quality: {quality}, start: {start_time}, end: {end_time})")
 
     if not task_id:
         raise HTTPException(
@@ -59,7 +61,9 @@ def youtube_clips_handler(
                 clip_duration=clip_duration,
                 composition_mode=composition_mode,
                 add_cta=add_cta,
-                quality=quality_str
+                quality=quality_str,
+                start_time=start_time,
+                end_time=end_time
             )
 
         local_clips = ProcessWrapper.run(task_id, execute_process)
