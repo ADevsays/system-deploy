@@ -28,6 +28,7 @@ class YoutubeClipsRequest(BaseModel):
     clip_duration: Optional[int] = Field(None, description="Duration in seconds for each clip. Default is 180s.", example=60)
     composition_mode: Optional[str] = Field("normal", description="Composition mode: 'normal' (3:4 canvas with top/bottom bars) or 'fullscreen' (blurred background)", example="normal")
     add_cta: Optional[bool] = Field(False, description="Whether to append a 3-second Call-To-Action screen with channel logo and thumbnail at the end of each clip", example=False)
+    quality: Optional[str] = Field("720p", description="Download video quality: '480p', '720p', or '1080p' (also accepts 480, 720, 1080)", example="720p")
 
 
 @router.post("/cut")
@@ -54,7 +55,7 @@ async def meme_video_route(
 @router.post(
     "/youtube-clips",
     summary="Process YouTube video into 3:4 viral clips",
-    description="Downloads a YouTube video, removes specified segments (e.g. ads), splits it into N clips or by duration, generates viral titles with Grok AI, renders in 3:4 format with ASS subtitles, and uploads to Google Drive folder 11nrbGOByVtQHs2b1ipwTo41khIY1-V6F without saving files locally."
+    description="Downloads a YouTube video (at selectable quality: 480p, 720p, or 1080p), removes specified segments (e.g. ads), splits it into N clips or by duration, generates viral titles with Grok AI, renders in 3:4 format with ASS subtitles, and uploads to Google Drive folder 11nrbGOByVtQHs2b1ipwTo41khIY1-V6F without saving files locally."
 )
 def youtube_clips_route(payload: YoutubeClipsRequest):
     return youtube_clips_handler(
@@ -64,7 +65,8 @@ def youtube_clips_route(payload: YoutubeClipsRequest):
         num_clips=payload.num_clips,
         clip_duration=payload.clip_duration,
         composition_mode=payload.composition_mode,
-        add_cta=payload.add_cta
+        add_cta=payload.add_cta,
+        quality=payload.quality
     )
 
 

@@ -78,17 +78,26 @@ def _get_ytdlp_base_args() -> list[str]:
     return args
 
 
-def download_via_apify(url: str, output_dir: str, apify_token: str) -> str:
-    """
-    Downloads a YouTube video using Apify youtube-video-downloader actor,
-    bypassing datacenter IP blocks completely.
-    """
-    logger.info(f"Downloading YouTube video via Apify Actor: {url}")
+def normalize_quality(quality: str | int | None) -> tuple[str, int]:
+    if not quality:
+        return "720p", 720
+
+    clean = str(quality).strip().lower().rstrip("p")
+    if clean in ("480", "720", "1080"):
+        h = int(clean)
+        return f"{h}p", h
+
+    raise ValueError(f"Invalid quality '{quality}'. Allowed values are 480, 720, 1080 (or 480p, 720p, 1080p).")
+
+
+def download_via_apify(url: str, output_dir: str, apify_token: str, quality: str = "720p") -> str:
+    quality_str, _ = normalize_quality(quality)
+    logger.info(f"Downloading YouTube video via Apify Actor: {url} (quality: {quality_str})")
     payload = {
         "videos": [{"url": url}],
         "storeInKVStore": True,
         "preferredFormat": "mp4",
-        "preferredQuality": "720p"
+        "preferredQuality": quality_str
     }
 
     endpoint = f"https://api.apify.com/v2/acts/streamers~youtube-video-downloader/run-sync-get-dataset-items?token={apify_token}&timeout=360"
@@ -122,27 +131,34 @@ def download_via_apify(url: str, output_dir: str, apify_token: str) -> str:
     return os.path.abspath(dest_path)
 
 
-def download_youtube_video(url: str, output_dir: str) -> str:
-    # 1. Try Apify if APIFY_TOKEN is configured
+def download_youtube_video(url: str, output_dir: str, quality: str = "720p") -> str:
+    quality_str, height = normalize_quality(quality)
+
     apify_token = os.getenv("APIFY_TOKEN", "").strip()
     if apify_token:
         try:
-            return download_via_apify(url, output_dir, apify_token)
+            return download_via_apify(url, output_dir, apify_token, quality=quality_str)
         except Exception as e:
             logger.warning(f"Apify download failed, falling back to yt-dlp: {e}")
 
-    # 2. Fallback to local yt-dlp
     output_template = os.path.join(output_dir, "%(id)s.%(ext)s")
     base_args = _get_ytdlp_base_args()
+    format_selector = (
+        f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]/"
+        f"bestvideo[height<={height}]+bestaudio/"
+        f"best[height<={height}][ext=mp4]/"
+        f"best[height<={height}]/"
+        "best"
+    )
     cmd = [
         "yt-dlp",
         *base_args,
-        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "-f", format_selector,
         "--merge-output-format", "mp4",
         "-o", output_template,
         url
     ]
-    run_command(cmd, "YouTube video download")
+    run_command(cmd, f"YouTube video download ({quality_str})")
 
     for fname in os.listdir(output_dir):
         if fname.endswith(".mp4"):

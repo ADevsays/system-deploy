@@ -21,9 +21,10 @@ def youtube_clips_handler(
     num_clips: int = None,
     clip_duration: int = None,
     composition_mode: str = "normal",
-    add_cta: bool = False
+    add_cta: bool = False,
+    quality: str = "720p"
 ):
-    logger.info(f"Starting YouTube clips handler for URL: {url}")
+    logger.info(f"Starting YouTube clips handler for URL: {url} (quality: {quality})")
 
     if not task_id:
         raise HTTPException(
@@ -38,6 +39,15 @@ def youtube_clips_handler(
             detail=f"Task {task_id} not found"
         )
 
+    from app.services.video.youtube_clips.downloader import normalize_quality
+    try:
+        quality_str, _ = normalize_quality(quality or getattr(settings, "YOUTUBE_DOWNLOAD_QUALITY", "720p"))
+    except ValueError as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
     local_clips = []
     try:
         def execute_process():
@@ -48,7 +58,8 @@ def youtube_clips_handler(
                 num_clips=num_clips,
                 clip_duration=clip_duration,
                 composition_mode=composition_mode,
-                add_cta=add_cta
+                add_cta=add_cta,
+                quality=quality_str
             )
 
         local_clips = ProcessWrapper.run(task_id, execute_process)

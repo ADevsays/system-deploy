@@ -20,6 +20,7 @@ services:
       - YOUTUBE_COOKIES_CONTENT=${YOUTUBE_COOKIES_CONTENT:-}
       - YOUTUBE_PROXY=${YOUTUBE_PROXY:-}
       - YOUTUBE_PLAYER_CLIENT=${YOUTUBE_PLAYER_CLIENT:-android,web}
+      - YOUTUBE_DOWNLOAD_QUALITY=${YOUTUBE_DOWNLOAD_QUALITY:-720p}
       - APIFY_TOKEN=${APIFY_TOKEN:-}
     volumes:
       - ./credentials.json:/app/credentials.json:ro

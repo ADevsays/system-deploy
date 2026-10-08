@@ -53,6 +53,30 @@ curl -X POST \
   http://localhost:8000/audio/cut
 ```
 
+### Video & YouTube Processing
+
+**POST** `/video/youtube-clips`
+- Descarga video de YouTube, recorta pausas/anuncios, trocea en clips y renderiza formato 3:4 con subtítulos ASS.
+- **Calidad seleccionable**: `quality`: `"480p"`, `"720p"` (por defecto) o `"1080p"`.
+- Sube los resultados directamente a Google Drive.
+
+```bash
+curl -X POST http://localhost:8000/video/youtube-clips \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "task_id": "<task_id>",
+    "quality": "720p",
+    "num_clips": 3,
+    "clip_duration": 60,
+    "composition_mode": "normal",
+    "add_cta": false
+  }'
+```
+
+**DELETE** `/video/youtube-clips/{file_id}`
+- Elimina un clip generado de Google Drive usando su ID o URL.
+
 ### Task Management
 
 **GET** `/tasks/init`
@@ -72,6 +96,8 @@ curl -X POST \
 | `GOOGLE_CREDENTIALS_PATH` | Ruta a credentials.json | `/app/credentials.json` |
 | `TEMP_DIR` | Directorio temporal | `/app/temp` |
 | `CORS_ORIGINS` | Orígenes permitidos (separados por coma) | `http://localhost:5173,https://app.com` |
+| `YOUTUBE_DOWNLOAD_QUALITY` | Calidad por defecto para descargas (`480p`, `720p`, `1080p`) | `720p` |
+| `APIFY_TOKEN` | Token de Apify para descargas sin bloqueo de IP | `apify_api_...` |
 
 ### Google Drive Setup
 
