@@ -224,8 +224,8 @@ def download_youtube_video(
 
     apify_token = os.getenv("APIFY_TOKEN", "").strip()
     if apify_token:
-        try:
-            if is_trim:
+        if is_trim:
+            try:
                 return download_via_apify_cutter(
                     url,
                     output_dir,
@@ -234,10 +234,17 @@ def download_youtube_video(
                     end_time=end_time,
                     quality=quality_str
                 )
-            else:
+            except Exception as e:
+                logger.warning(f"Apify cutter actor failed ({e}), falling back to full Apify downloader...")
+                try:
+                    return download_via_apify(url, output_dir, apify_token, quality=quality_str)
+                except Exception as e2:
+                    logger.warning(f"Full Apify downloader also failed: {e2}, falling back to local yt-dlp")
+        else:
+            try:
                 return download_via_apify(url, output_dir, apify_token, quality=quality_str)
-        except Exception as e:
-            logger.warning(f"Apify download failed, falling back to yt-dlp: {e}")
+            except Exception as e:
+                logger.warning(f"Apify download failed: {e}, falling back to local yt-dlp")
 
     output_template = os.path.join(output_dir, "%(id)s.%(ext)s")
     base_args = _get_ytdlp_base_args()

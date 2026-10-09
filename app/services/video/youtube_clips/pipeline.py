@@ -82,11 +82,28 @@ async def _process_youtube_url_async(
         )
 
         # 3. Trim / Exclude segments
+        if (start_time or end_time) and not os.path.basename(raw_file).startswith("trimmed_"):
+            logger.info(f"Applying local FFmpeg time trimming from {start_time} to {end_time}...")
+            time_trimmed_path = os.path.join(temp_dir, f"time_cut_{job_id}.mp4")
+            trim_cmd = ["ffmpeg", "-y"]
+            if start_time:
+                trim_cmd.extend(["-ss", str(start_time)])
+            trim_cmd.extend(["-i", raw_file])
+            if end_time:
+                trim_cmd.extend(["-to", str(end_time)])
+            trim_cmd.extend(["-c", "copy", time_trimmed_path])
+            try:
+                run_command(trim_cmd, "local time trimming")
+                if os.path.exists(time_trimmed_path) and os.path.getsize(time_trimmed_path) > 0:
+                    raw_file = time_trimmed_path
+            except Exception as e:
+                logger.warning(f"Fast copy trim failed ({e}), continuing with full raw file")
+
         if exclude_segments:
             trimmed_file = exclude_segments_logic(raw_file, exclude_segments, temp_dir, job_id)
         else:
             trimmed_file = raw_file
-            logger.info("Processing complete video without segment exclusion")
+            logger.info("Processing video without segment exclusion")
 
         # 4. Segmentation
         clips_to_process = split_into_segments(
