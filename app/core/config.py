@@ -20,7 +20,9 @@ else:
 
 class Settings:
     BASE_DIR: Path = BASE_DIR
-    TEMP_DIR: str = os.getenv("TEMP_DIR", "/app/temp")
+    TEMP_DIR: str = os.getenv("TEMP_DIR", str(BASE_DIR / "temp"))
+    if TEMP_DIR.startswith("/app") and not os.path.exists("/app"):
+        TEMP_DIR = str(BASE_DIR / "temp")
     GOOGLE_DRIVE_AUDIO_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_AUDIO_FOLDER_ID", "")
     GOOGLE_DRIVE_MEME_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_MEME_FOLDER_ID", "")
     GOOGLE_DRIVE_YOUTUBE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_YOUTUBE_FOLDER_ID", "11nrbGOByVtQHs2b1ipwTo41khIY1-V6F")
@@ -39,7 +41,7 @@ class Settings:
     YOUTUBE_COOKIES_FILE: str = os.getenv("YOUTUBE_COOKIES_FILE", "/app/cookies.txt")
     YOUTUBE_COOKIES_CONTENT: str = os.getenv("YOUTUBE_COOKIES_CONTENT", "")
     YOUTUBE_PROXY: str = os.getenv("YOUTUBE_PROXY", "")
-    YOUTUBE_PLAYER_CLIENT: str = os.getenv("YOUTUBE_PLAYER_CLIENT", "android,web")
+    YOUTUBE_PLAYER_CLIENT: str = os.getenv("YOUTUBE_PLAYER_CLIENT", "")
     YOUTUBE_DOWNLOAD_QUALITY: str = os.getenv("YOUTUBE_DOWNLOAD_QUALITY", "720p")
     APIFY_TOKEN: str = os.getenv("APIFY_TOKEN", "")
 

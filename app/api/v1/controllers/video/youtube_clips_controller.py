@@ -53,7 +53,8 @@ def youtube_clips_handler(
     local_clips = []
     try:
         def execute_process():
-            return process_youtube_url(
+            nonlocal local_clips
+            local_clips = process_youtube_url(
                 url=url,
                 results_dir=RESULTS_DIR,
                 exclude_segments=exclude_segments,
@@ -65,51 +66,56 @@ def youtube_clips_handler(
                 start_time=start_time,
                 end_time=end_time
             )
+            logger.info(f"Generated {len(local_clips)} local clips. Preparing Google Drive upload...")
 
-        local_clips = ProcessWrapper.run(task_id, execute_process)
-        logger.info(f"Generated {len(local_clips)} local clips. Preparing Google Drive upload...")
+            from app.services.google_drive import drive_service
+            drive_folder = settings.GOOGLE_DRIVE_YOUTUBE_FOLDER_ID or YOUTUBE_FOLDER_ID
 
-        from app.services.google_drive import drive_service
-        drive_folder = settings.GOOGLE_DRIVE_YOUTUBE_FOLDER_ID or YOUTUBE_FOLDER_ID
+            segments_urls = []
+            files_metadata = []
 
-        segments_urls = []
-        files_metadata = []
+            for clip_path in local_clips:
+                filename = os.path.basename(clip_path)
+                logger.info(f"Uploading {filename} to Google Drive folder {drive_folder}...")
+                upload_res = drive_service.upload_file(
+                    file_path=clip_path,
+                    filename=filename,
+                    mime_type="video/mp4",
+                    folder_id=drive_folder
+                )
+                drive_url = upload_res.get("drive_url")
+                file_id = upload_res.get("file_id")
 
-        for clip_path in local_clips:
-            filename = os.path.basename(clip_path)
-            logger.info(f"Uploading {filename} to Google Drive folder {drive_folder}...")
-            upload_res = drive_service.upload_file(
-                file_path=clip_path,
-                filename=filename,
-                mime_type="video/mp4",
-                folder_id=drive_folder
-            )
-            drive_url = upload_res.get("drive_url")
-            file_id = upload_res.get("file_id")
+                segments_urls.append(drive_url)
+                files_metadata.append({
+                    "file_id": file_id,
+                    "drive_url": drive_url,
+                    "filename": filename
+                })
 
-            segments_urls.append(drive_url)
-            files_metadata.append({
-                "file_id": file_id,
-                "drive_url": drive_url,
-                "filename": filename
-            })
+                if os.path.exists(clip_path):
+                    try:
+                        os.remove(clip_path)
+                        logger.info(f"Removed local file: {clip_path}")
+                    except OSError as err:
+                        logger.warning(f"Could not remove local file {clip_path}: {err}")
 
-            # Remove local clip immediately after upload so nothing remains on disk
-            if os.path.exists(clip_path):
-                try:
-                    os.remove(clip_path)
-                    logger.info(f"Removed local file: {clip_path}")
-                except OSError as err:
-                    logger.warning(f"Could not remove local file {clip_path}: {err}")
+            return {
+                "segments": segments_urls,
+                "files": files_metadata,
+                "folder_id": drive_folder
+            }
+
+        result = ProcessWrapper.run(task_id, execute_process)
 
         return JSONResponse({
             "success": True,
             "task_id": task_id,
-            "segments": segments_urls,
-            "files": files_metadata,
-            "count": len(segments_urls),
-            "folder_id": drive_folder,
-            "message": f"Se generaron y subieron {len(segments_urls)} clips a Google Drive exitosamente"
+            "segments": result["segments"],
+            "files": result["files"],
+            "count": len(result["segments"]),
+            "folder_id": result["folder_id"],
+            "message": f"Se generaron y subieron {len(result['segments'])} clips a Google Drive exitosamente"
         })
 
     except HTTPException:

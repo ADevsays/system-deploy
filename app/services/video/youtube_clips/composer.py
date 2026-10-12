@@ -161,7 +161,7 @@ def _apply_cta_filters(cmd, fc, last_out, canvas_w, canvas_h, add_cta, cta_start
     
     fc = fc.rstrip("; ") + f"; [{last_out}]boxblur=30:5:enable='gte(t,{cta_start})'[bg_blur]; "
     fc += f"[{thumb_idx}:v]scale={thumb_w}:-1,setsar=1[thumb]; "
-    fc += f"[bg_blur][thumb]overlay=x=(W-w)/2:y=(H-h)/2+10*sin(t*15):enable='gte(t,{cta_start})'[bg_thumb]; "
+    fc += f"[bg_blur][thumb]overlay=x=(W-w)/2:y=(H-h)/2+6*sin((t-{cta_start})*2.5):enable='gte(t,{cta_start})'[bg_thumb]; "
     
     if has_logo:
         fc += f"[{logo_idx}:v]scale={logo_w}:-1[logo]; "

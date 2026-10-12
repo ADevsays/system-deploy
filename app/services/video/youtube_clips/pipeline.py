@@ -9,6 +9,7 @@ from .metadata import generate_clips_metadata
 from .downloader import download_youtube_video, get_youtube_metadata
 from .segmenter import split_into_segments, exclude_segments_logic
 from .composer import apply_3_4_composition
+from .helpers import run_command
 
 logger = logging.getLogger(__name__)
 

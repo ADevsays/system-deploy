@@ -21,8 +21,8 @@ def _get_ytdlp_base_args() -> list[str]:
     """
     args = []
 
-    # 1. Extractor args: default to android,web to bypass web client bot checks on datacenter IPs
-    player_clients = os.getenv("YOUTUBE_PLAYER_CLIENT", "android,web")
+    # 1. Extractor args: only if explicitly specified (forcing 'android' limits YouTube formats to low resolution)
+    player_clients = os.getenv("YOUTUBE_PLAYER_CLIENT")
     if player_clients:
         args.extend(["--extractor-args", f"youtube:player_client={player_clients}"])
 
@@ -34,6 +34,7 @@ def _get_ytdlp_base_args() -> list[str]:
         pass  # Deno is enabled by default in yt-dlp if present
     elif shutil.which("node"):
         args.extend(["--js-runtimes", "node"])
+    args.extend(["--remote-components", "ejs:github"])
 
     # 3. Cookies support: check file or environment variable
     cookies_path = os.getenv("YOUTUBE_COOKIES_FILE") or os.getenv("YOUTUBE_COOKIES_PATH")
@@ -222,31 +223,8 @@ def download_youtube_video(
     quality_str, height = normalize_quality(quality)
     is_trim = bool(start_time or end_time)
 
-    apify_token = os.getenv("APIFY_TOKEN", "").strip()
-    if apify_token:
-        if is_trim:
-            try:
-                return download_via_apify_cutter(
-                    url,
-                    output_dir,
-                    apify_token,
-                    start_time=start_time or "00:00:00",
-                    end_time=end_time,
-                    quality=quality_str
-                )
-            except Exception as e:
-                logger.warning(f"Apify cutter actor failed ({e}), falling back to full Apify downloader...")
-                try:
-                    return download_via_apify(url, output_dir, apify_token, quality=quality_str)
-                except Exception as e2:
-                    logger.warning(f"Full Apify downloader also failed: {e2}, falling back to local yt-dlp")
-        else:
-            try:
-                return download_via_apify(url, output_dir, apify_token, quality=quality_str)
-            except Exception as e:
-                logger.warning(f"Apify download failed: {e}, falling back to local yt-dlp")
-
-    output_template = os.path.join(output_dir, "%(id)s.%(ext)s")
+    output_prefix = "trimmed_%(id)s" if is_trim else "%(id)s"
+    output_template = os.path.join(output_dir, f"{output_prefix}.%(ext)s")
     base_args = _get_ytdlp_base_args()
     if is_trim:
         start_hhmmss = format_time_hhmmss(start_time, default="00:00:00")
@@ -263,9 +241,11 @@ def download_youtube_video(
     )
     cmd = [
         "yt-dlp",
+        "--no-update",
         *base_args,
         "-f", format_selector,
         "--merge-output-format", "mp4",
+        "--remux-video", "mp4",
         "-o", output_template,
         url
     ]
