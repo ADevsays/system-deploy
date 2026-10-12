@@ -26,9 +26,11 @@ jobs:
           cd /DATA/system-deploy
           git fetch --quiet origin main
           git checkout --quiet --detach "$REVISION"
-          /usr/lib/docker/cli-plugins/docker-compose \
-            --env-file .env \
-            -f docker-compose.zima.yml \
-            -p system-deploy \
-            up -d --build --force-recreate
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /DATA/system-deploy:/DATA/system-deploy \
+            -w /DATA/system-deploy \
+            docker:27-cli \
+            compose --env-file .env -f docker-compose.zima.yml -p system-deploy up -d --build --force-recreate
           curl --fail --silent --show-error http://127.0.0.1:8000/ >/dev/null
+
