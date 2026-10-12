@@ -31,14 +31,4 @@ jobs:
             -v /DATA/system-deploy:/DATA/system-deploy \
             -w /DATA/system-deploy \
             docker:27-cli \
-            compose --env-file .env -f docker-compose.zima.yml -p system-deploy up -d --build --force-recreate
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error http://127.0.0.1:8000/ >/dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "system-deploy did not become ready within one minute." >&2
-          exit 1
-
-
+            compose --env-file .env -f docker-compose.zima.yml -p system-deploy up -d --build --force-recreate --wait --wait-timeout 120
