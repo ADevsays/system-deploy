@@ -25,5 +25,9 @@ jobs:
           cd /DATA/system-deploy
           git fetch --quiet origin main
           git checkout --quiet --detach "$REVISION"
-          sudo /usr/local/sbin/deploy-system-deploy "$REVISION"
-
+          /usr/lib/docker/cli-plugins/docker-compose \
+            --env-file .env \
+            -f docker-compose.zima.yml \
+            -p system-deploy \
+            up -d --build --force-recreate
+          curl --fail --silent --show-error http://127.0.0.1:8000/ >/dev/null
