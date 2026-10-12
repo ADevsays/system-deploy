@@ -22,7 +22,8 @@ jobs:
           REVISION: ${{ github.sha }}
         run: |
           set -eu
-          git config --global --add safe.directory /DATA/system-deploy`n          cd /DATA/system-deploy
+          git config --global --add safe.directory /DATA/system-deploy
+          cd /DATA/system-deploy
           git fetch --quiet origin main
           git checkout --quiet --detach "$REVISION"
           /usr/lib/docker/cli-plugins/docker-compose \
@@ -31,4 +32,3 @@ jobs:
             -p system-deploy \
             up -d --build --force-recreate
           curl --fail --silent --show-error http://127.0.0.1:8000/ >/dev/null
-
