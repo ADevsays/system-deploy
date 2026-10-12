@@ -1,0 +1,32 @@
+name: Deploy to ZimaBoard
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: system-deploy-zima
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, x64, system-deploy]
+    steps:
+      - name: Deploy the published revision
+        env:
+          REVISION: ${{ github.sha }}
+        run: |
+          set -eu
+          cd /DATA/system-deploy
+          git fetch --quiet origin main
+          git checkout --quiet --detach "$REVISION"
+          /usr/lib/docker/cli-plugins/docker-compose \
+            --env-file .env \
+            -f docker-compose.zima.yml \
+            -p system-deploy \
+            up -d --build --force-recreate
