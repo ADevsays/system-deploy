@@ -34,11 +34,18 @@ def _get_ytdlp_base_args() -> list[str]:
         pass  # Deno is enabled by default in yt-dlp if present
     elif shutil.which("node"):
         args.extend(["--js-runtimes", "node"])
+    elif shutil.which("nodejs"):
+        args.extend(["--js-runtimes", "nodejs"])
     args.extend(["--remote-components", "ejs:github"])
 
-    # 3. Cookies support: check file or environment variable
+    # 3. Cookies support: check browser, file or environment variable
+    cookies_browser = os.getenv("YOUTUBE_COOKIES_FROM_BROWSER")
+    if cookies_browser:
+        logger.info(f"Using cookies from browser: {cookies_browser}")
+        args.extend(["--cookies-from-browser", cookies_browser])
+
     cookies_path = os.getenv("YOUTUBE_COOKIES_FILE") or os.getenv("YOUTUBE_COOKIES_PATH")
-    if not cookies_path:
+    if not cookies_path or not os.path.isfile(cookies_path):
         candidates = [
             "/app/cookies.txt",
             os.path.join(os.getcwd(), "cookies.txt"),

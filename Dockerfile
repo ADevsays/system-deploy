@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     wget \
     nodejs \
+    npm \
+    && if [ -f /usr/bin/nodejs ] && [ ! -f /usr/bin/node ]; then ln -s /usr/bin/nodejs /usr/bin/node; fi \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -28,6 +30,7 @@ RUN mkdir -p /app/app/assets/fonts && \
 RUN mkdir -p /app/temp
 
 ENV PYTHONUNBUFFERED=1
+ENV YOUTUBE_JS_RUNTIME=node
 
 EXPOSE 8000
 
