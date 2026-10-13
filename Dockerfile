@@ -1,23 +1,19 @@
+FROM node:22-bookworm-slim AS node_runtime
+
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# yt-dlp requires Node 20+ for YouTube's JavaScript challenges.
-# NodeSource supplies Node 22; Debian's default package is Node 18.
+# yt-dlp supports Node 20+. Copying Node 22 avoids the large toolchain
+# required to add a third-party APT repository during every image build.
+COPY --from=node_runtime /usr/local/bin/node /usr/local/bin/node
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    gnupg \
     ffmpeg \
     fontconfig \
     wget \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends nodejs \
+    libstdc++6 \
     && node --version \
-    && apt-get purge -y --auto-remove curl gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

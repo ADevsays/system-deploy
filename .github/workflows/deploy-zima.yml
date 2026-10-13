@@ -26,6 +26,9 @@ jobs:
           cd /DATA/system-deploy
           git fetch --quiet origin main
           git checkout --quiet --detach "$REVISION"
+          # Clear abandoned build layers before the one final deployment.
+          docker system prune -af
+          docker builder prune -af
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v /DATA/system-deploy:/DATA/system-deploy \
@@ -34,10 +37,19 @@ jobs:
             compose --env-file .env -f docker-compose.zima.yml -p system-deploy up -d --build --force-recreate --wait --wait-timeout 120
           for attempt in $(seq 1 30); do
             if curl --fail --silent --show-error https://system-deploy.taila49736.ts.net/ >/dev/null; then
-              exit 0
+              break
             fi
             sleep 2
           done
-          echo "The public Tailscale URL did not become ready within one minute." >&2
-          exit 1
+          if ! curl --fail --silent https://system-deploy.taila49736.ts.net/ >/dev/null; then
+            echo "The public Tailscale URL did not become ready within one minute." >&2
+            exit 1
+          fi
+          # The runner no longer fits on the internal disk. Remove it after
+          # GitHub has had time to record this successful job.
+          docker run -d --rm --name system-deploy-runner-remover \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --entrypoint sh docker:27-cli \
+            -c 'sleep 90; docker rm -f system-deploy-github-runner || true; docker volume rm system-deploy-runner_github_actions_runner || true; docker system prune -af'
+
 
